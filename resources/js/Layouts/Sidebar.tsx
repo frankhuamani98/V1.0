@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { InertiaLink } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import { ChevronDown, ChevronRight, Home, LogOut, Car, Users, BarChart as ChartBar, Cog, Menu, FileText, CreditCard, Bell, HelpCircle, UserPlus, Truck, Calendar, BarChart2, PieChart, TrendingUp, Layers, MessageCircle, Tag, Megaphone, Package } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,13 +27,13 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
         onClick={() => hasSubItems && setIsOpen(!isOpen)}
       >
         {href ? (
-          <InertiaLink
+          <Link
             href={href}
             className="flex items-center space-x-3 w-full"
           >
             <div className="flex-shrink-0">{icon}</div>
             <span className="font-medium">{label}</span>
-          </InertiaLink>
+          </Link>
         ) : (
           <div className="flex items-center space-x-3 w-full cursor-pointer" onClick={() => hasSubItems && setIsOpen(!isOpen)}>
             <div className="flex-shrink-0">{icon}</div>
@@ -50,13 +50,13 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
       {hasSubItems && isOpen && (
         <div className="ml-6 mt-1 space-y-1 border-l-2 border-primary/20 pl-3">
           {subItems.map((item, index) => (
-            <InertiaLink
+            <Link
               key={index}
               href={item.href}
               className="block py-1.5 px-2 text-sm rounded-md hover:bg-primary/5 hover:text-primary transition-colors"
             >
               {item.label}
-            </InertiaLink>
+            </Link>
           ))}
         </div>
       )}

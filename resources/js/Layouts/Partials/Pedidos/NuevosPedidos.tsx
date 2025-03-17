@@ -1,0 +1,126 @@
+import React, { useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
+import { Badge } from "@/Components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+const NuevosPedidos = () => {
+  // Estado para almacenar los pedidos
+  const [pedidos, setPedidos] = useState([
+    { id: 1, cliente: "Juan Perez", producto: "Laptop", cantidad: 1, fecha: "2023-10-01", estado: "Pendiente" },
+    { id: 2, cliente: "Maria Gomez", producto: "Smartphone", cantidad: 2, fecha: "2023-10-02", estado: "Enviado" },
+    { id: 3, cliente: "Carlos Ruiz", producto: "Tablet", cantidad: 1, fecha: "2023-10-03", estado: "Entregado" },
+    { id: 4, cliente: "Ana Lopez", producto: "Monitor", cantidad: 1, fecha: "2023-10-04", estado: "Cancelado" },
+  ]);
+
+  // Estado para manejar qué filas están expandidas
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+  // Función para expandir/colapsar una fila
+  const toggleRow = (id: number) => {
+    if (expandedRows.includes(id)) {
+      setExpandedRows(expandedRows.filter((rowId) => rowId !== id));
+    } else {
+      setExpandedRows([...expandedRows, id]);
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Nuevos Pedidos</CardTitle>
+          <CardDescription>Aquí puedes gestionar los nuevos pedidos.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Tabla de pedidos */}
+          <div className="overflow-x-auto">
+            <Table className="min-w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="hidden sm:table-cell">ID</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead className="hidden sm:table-cell">Producto</TableHead>
+                  <TableHead className="hidden sm:table-cell">Cantidad</TableHead>
+                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="sm:hidden">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pedidos.map((pedido) => (
+                  <React.Fragment key={pedido.id}>
+                    <TableRow>
+                      <TableCell className="hidden sm:table-cell">{pedido.id}</TableCell>
+                      <TableCell>{pedido.cliente}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{pedido.producto}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{pedido.cantidad}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{pedido.fecha}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            pedido.estado === "Pendiente"
+                              ? "secondary"
+                              : pedido.estado === "Enviado"
+                              ? "outline"
+                              : pedido.estado === "Entregado"
+                              ? "default"
+                              : "destructive"
+                          }
+                        >
+                          {pedido.estado}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="sm:hidden">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toggleRow(pedido.id)}
+                          aria-label="Ver detalles"
+                        >
+                          {expandedRows.includes(pedido.id) ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    {/* Detalles expandibles */}
+                    {expandedRows.includes(pedido.id) && (
+                      <TableRow className="sm:hidden">
+                        <TableCell colSpan={7} className="p-4 bg-muted/50">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm font-medium">ID:</p>
+                              <p className="text-sm">{pedido.id}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Producto:</p>
+                              <p className="text-sm">{pedido.producto}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Cantidad:</p>
+                              <p className="text-sm">{pedido.cantidad}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Fecha:</p>
+                              <p className="text-sm">{pedido.fecha}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default NuevosPedidos;

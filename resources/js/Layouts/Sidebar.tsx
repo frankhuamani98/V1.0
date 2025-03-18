@@ -10,11 +10,13 @@ type NavItemProps = {
   href?: string;
   subItems?: Array<{ label: string; href: string }>;
   isActive?: boolean;
+  activeHref?: string;
 };
 
-const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const NavItem = ({ icon, label, href, subItems, isActive, activeHref }: NavItemProps) => {
+  const isSubItemActive = subItems?.some(item => item.href === activeHref);
+  const [isOpen, setIsOpen] = useState(isSubItemActive || isActive);
+  
   const hasSubItems = subItems && subItems.length > 0;
 
   return (
@@ -22,11 +24,11 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
       <div
         className={cn(
           "flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors",
-          isActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 hover:text-primary"
+          isActive || isSubItemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 hover:text-primary"
         )}
         onClick={() => hasSubItems && setIsOpen(!isOpen)}
       >
-        {href ? (
+        {href && !hasSubItems ? (
           <Link
             href={href}
             className="flex items-center space-x-3 w-full"
@@ -35,7 +37,7 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
             <span className="font-medium">{label}</span>
           </Link>
         ) : (
-          <div className="flex items-center space-x-3 w-full cursor-pointer" onClick={() => hasSubItems && setIsOpen(!isOpen)}>
+          <div className="flex items-center space-x-3 w-full">
             <div className="flex-shrink-0">{icon}</div>
             <span className="font-medium">{label}</span>
           </div>
@@ -46,14 +48,19 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
           </div>
         )}
       </div>
-
       {hasSubItems && isOpen && (
         <div className="ml-6 mt-1 space-y-1 border-l-2 border-primary/20 pl-3">
           {subItems.map((item, index) => (
             <Link
               key={index}
               href={item.href}
-              className="block py-1.5 px-2 text-sm rounded-md hover:bg-primary/5 hover:text-primary transition-colors"
+              className={cn(
+                "block py-1.5 px-2 text-sm rounded-md transition-colors",
+                item.href === activeHref 
+                  ? "bg-primary/10 text-primary" 
+                  : "hover:bg-primary/5 hover:text-primary"
+              )}
+              // Importante: No añadir evento onClick aquí para evitar cambiar el estado isOpen
             >
               {item.label}
             </Link>
@@ -67,32 +74,32 @@ const NavItem = ({ icon, label, href, subItems, isActive }: NavItemProps) => {
 interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
+  activeHref?: string;
 }
 
-const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname }: SidebarProps) => {
   const navItems = [
     {
       icon: <Home size={20} />,
       label: "Dashboard",
-      href: "/dashboard", // Ruta correcta
-      isActive: true,
-  },
-
-  {
-    icon: <Package size={20} />, // Cambié el ícono a 'Package', puedes ajustarlo al que prefieras
-    label: "Gestión de Pedidos",
-    subItems: [
-      { label: "Nuevos Pedidos", href: "/pedidos/nuevos" },
-      { label: "Estado de Pedidos", href: "/pedidos/estado" },
-      { label: "Pedidos Finalizados", href: "/pedidos/finalizados" },
-      { label: "Historial de Pedidos", href: "/pedidos/historial" },
-    ],
-  },
-  {
+      href: "/dashboard",
+      isActive: activeHref === "/dashboard",
+    },
+    {
+      icon: <Package size={20} />,
+      label: "Gestión de Pedidos",
+      subItems: [
+        { label: "Nuevos Pedidos", href: "/pedidos/nuevos" },
+        { label: "Estado de Pedidos", href: "/pedidos/estado" },
+        { label: "Pedidos Finalizados", href: "/pedidos/finalizados" },
+        { label: "Historial de Pedidos", href: "/pedidos/historial" },
+      ],
+    },
+    {
       icon: <Calendar size={20} />,
       label: "Gestión de Reservas",
       subItems: [
-        { label: "Reservas Nuevas", href: "/reservas/nuevas" }, // Ruta correcta
+        { label: "Reservas Nuevas", href: "/reservas/nuevas" },
         { label: "Estado de Reservas", href: "/reservas/estado" },
         { label: "Reservas Finalizadas", href: "/reservas/finalizadas" },
         { label: "Historial de Reservas", href: "/reservas/historial" },
@@ -115,9 +122,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         { label: "Inventario de Productos", href: "/productos/inventario" },
       ],
     },
-    
     {
-      icon: <Layers size={20} />, // Ícono actualizado para categorías
+      icon: <Layers size={20} />,
       label: "Gestión de Categorías",
       subItems: [
         { label: "Categorías Principales", href: "/categorias/principales" },
@@ -125,8 +131,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         { label: "Lista de Categorías y Subcategorías", href: "/categorias/lista" },
       ],
     },
-    
-    
     {
       icon: <Truck size={20} />,
       label: "Gestión de Motos",
@@ -135,9 +139,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         { label: "Historial de Motos", href: "/motos/historial" },
       ],
     },
-
     {
-      icon: <MessageCircle size={20} />, // Ícono actualizado para comentarios
+      icon: <MessageCircle size={20} />,
       label: "Gestión de Comentarios",
       subItems: [
         { label: "Lista de Comentarios", href: "/comentarios/lista" },
@@ -145,25 +148,22 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         { label: "Comentarios No Aprobados", href: "/comentarios/no-aprobados" },
       ],
     },
-
     {
-      icon: <Tag size={20} />, // Ícono para gestión de descuentos
+      icon: <Tag size={20} />,
       label: "Gestión de Descuentos",
       subItems: [
         { label: "Subir un Descuento", href: "/descuentos/subir" },
         { label: "Ruletas de Descuentos", href: "/descuentos/ruletas" },
       ],
     },
-
     {
-      icon: <Megaphone size={20} />, // Ícono para gestión de publicidad
+      icon: <Megaphone size={20} />,
       label: "Gestión de Publicidad",
       subItems: [
         { label: "Subir una Publicidad", href: "/publicidad/subir" },
         { label: "Historial de Publicidades", href: "/publicidad/historial" },
       ],
     },
-        
     {
       icon: <FileText size={20} />,
       label: "Gestión de Facturación",
@@ -180,7 +180,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         { label: "Soporte Técnico", href: "/soporte/tecnico" },
       ],
     },
-
   ];
 
   return (
@@ -192,13 +191,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           onClick={toggleSidebar}
         />
       )}
-
       {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 lg:w-72 bg-card border-r shadow-lg flex flex-col transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0" // Always visible on medium screens and up
+          "md:translate-x-0"
         )}
       >
         {/* Header */}
@@ -209,7 +207,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </div>
           <p className="text-xs text-muted-foreground mt-1">Premium Auto Management</p>
         </div>
-
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">
           {navItems.map((item, index) => (
@@ -220,10 +217,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
               href={item.href}
               subItems={item.subItems}
               isActive={item.isActive}
+              activeHref={activeHref}
             />
           ))}
         </nav>
-
       </aside>
     </>
   );

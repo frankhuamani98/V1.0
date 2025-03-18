@@ -29,14 +29,12 @@ const PedidosFinalizados = () => {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Función para expandir/colapsar una fila
   const toggleRow = (id: number) => {
     setExpandedRows((prev) =>
       prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
     );
   };
 
-  // Filtrado de pedidos según el término de búsqueda
   const filteredPedidos = pedidos.filter(
     (pedido) =>
       pedido.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,94 +64,83 @@ const PedidosFinalizados = () => {
               placeholder="Buscar por cliente o motocicleta"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 border rounded-md w-full max-w-md"
+              className="px-4 py-2 border rounded-md w-full sm:max-w-md"
             />
           </div>
         </CardHeader>
         <CardContent>
-          {/* Si no hay pedidos, mostrar mensaje */}
           {filteredPedidos.length === 0 ? (
             <p className="text-center text-lg text-gray-500">No hay órdenes finalizadas que coincidan con la búsqueda.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table className="min-w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="hidden sm:table-cell">ID</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead className="hidden sm:table-cell">Motocicleta</TableHead>
-                    <TableHead>Servicio</TableHead>
-                    <TableHead className="hidden sm:table-cell">Fecha</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="sm:hidden">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPedidos.map((pedido) => (
-                    <React.Fragment key={pedido.id}>
-                      <TableRow>
-                        <TableCell className="hidden sm:table-cell">{pedido.id}</TableCell>
+            <>
+              {/* Tabla en pantallas grandes */}
+              <div className="overflow-x-auto hidden sm:block">
+                <Table className="min-w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Motocicleta</TableHead>
+                      <TableHead>Servicio</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Estado</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPedidos.map((pedido) => (
+                      <TableRow key={pedido.id}>
+                        <TableCell>{pedido.id}</TableCell>
                         <TableCell>{pedido.cliente}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{pedido.moto}</TableCell>
+                        <TableCell>{pedido.moto}</TableCell>
                         <TableCell>{pedido.servicio}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{pedido.fecha}</TableCell>
+                        <TableCell>{pedido.fecha}</TableCell>
                         <TableCell>
                           <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
                         </TableCell>
-                        <TableCell className="sm:hidden">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => toggleRow(pedido.id)}
-                            aria-label="Ver detalles"
-                          >
-                            {expandedRows.includes(pedido.id) ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
                       </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-                      {/* Detalles expandibles */}
-                      {expandedRows.includes(pedido.id) && (
-                        <TableRow className="sm:hidden">
-                          <TableCell colSpan={7} className="p-4 bg-muted/50">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-sm font-medium">ID:</p>
-                                <p className="text-sm">{pedido.id}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Motocicleta:</p>
-                                <p className="text-sm">{pedido.moto}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Servicio:</p>
-                                <p className="text-sm">{pedido.servicio}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Fecha:</p>
-                                <p className="text-sm">{pedido.fecha}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Número de Orden:</p>
-                                <p className="text-sm">{pedido.numeroOrden}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">Dirección:</p>
-                                <p className="text-sm">{pedido.direccion}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+              {/* Tarjetas en móviles */}
+              <div className="sm:hidden space-y-4">
+                {filteredPedidos.map((pedido) => (
+                  <div key={pedido.id} className="bg-white rounded-lg shadow-md p-4">
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">{pedido.cliente}</p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleRow(pedido.id)}
+                        aria-label="Ver detalles"
+                      >
+                        {expandedRows.includes(pedido.id) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-600"><strong>Motocicleta:</strong> {pedido.moto}</p>
+                    <p className="text-sm text-gray-600"><strong>Servicio:</strong> {pedido.servicio}</p>
+                    <p className="text-sm text-gray-600"><strong>Fecha:</strong> {pedido.fecha}</p>
+                    <p className="text-sm">
+                      <strong>Estado:</strong>{" "}
+                      <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
+                    </p>
+                    
+                    {/* Detalles expandibles */}
+                    {expandedRows.includes(pedido.id) && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-sm"><strong>Número de Orden:</strong> {pedido.numeroOrden}</p>
+                        <p className="text-sm"><strong>Dirección:</strong> {pedido.direccion}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

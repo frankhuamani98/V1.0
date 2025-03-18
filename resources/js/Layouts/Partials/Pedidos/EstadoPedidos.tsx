@@ -56,16 +56,16 @@ const EstadoPedidos = () => {
           <CardDescription>Gestiona y actualiza el estado de los servicios en el taller.</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Tabla de órdenes */}
-          <div className="overflow-x-auto">
+          {/* Tabla en pantallas grandes */}
+          <div className="overflow-x-auto hidden sm:block">
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="hidden sm:table-cell">ID</TableHead>
+                  <TableHead>ID</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead className="hidden sm:table-cell">Motocicleta</TableHead>
+                  <TableHead>Motocicleta</TableHead>
                   <TableHead>Servicio</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Actualizar</TableHead>
                 </TableRow>
@@ -73,11 +73,11 @@ const EstadoPedidos = () => {
               <TableBody>
                 {pedidos.map((pedido) => (
                   <TableRow key={pedido.id}>
-                    <TableCell className="hidden sm:table-cell">{pedido.id}</TableCell>
+                    <TableCell>{pedido.id}</TableCell>
                     <TableCell>{pedido.cliente}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{pedido.moto}</TableCell>
+                    <TableCell>{pedido.moto}</TableCell>
                     <TableCell>{pedido.servicio}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{pedido.fecha}</TableCell>
+                    <TableCell>{pedido.fecha}</TableCell>
                     <TableCell>
                       <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
                     </TableCell>
@@ -101,6 +101,37 @@ const EstadoPedidos = () => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Vista en tarjetas para móviles */}
+          <div className="sm:hidden space-y-4">
+            {pedidos.map((pedido) => (
+              <div key={pedido.id} className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{pedido.cliente}</p>
+                  <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
+                </div>
+                <p className="text-sm text-gray-600"><strong>Motocicleta:</strong> {pedido.moto}</p>
+                <p className="text-sm text-gray-600"><strong>Servicio:</strong> {pedido.servicio}</p>
+                <p className="text-sm text-gray-600"><strong>Fecha:</strong> {pedido.fecha}</p>
+                <div className="mt-2">
+                  <Select
+                    value={pedido.estado}
+                    onValueChange={(nuevoEstado) => actualizarEstado(pedido.id, nuevoEstado)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona un estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="En reparación">En reparación</SelectItem>
+                      <SelectItem value="Listo para entrega">Listo para entrega</SelectItem>
+                      <SelectItem value="Cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

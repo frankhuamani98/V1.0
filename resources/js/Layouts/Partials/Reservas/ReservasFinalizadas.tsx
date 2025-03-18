@@ -17,13 +17,6 @@ import {
 } from "@/Components/ui/card";
 import { Input } from "@/Components/ui/input";
 import { Button } from "@/Components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/Components/ui/select";
 import { ChevronUp, ChevronDown, CheckCircle, Search } from "lucide-react";
 
 const ReservasFinalizadas = () => {
@@ -60,9 +53,8 @@ const ReservasFinalizadas = () => {
         </CardHeader>
         <CardContent>
           {/* Barra de búsqueda y filtros */}
-          <div className="flex flex-wrap gap-4 mb-4 items-center">
-            {/* Campo de búsqueda con icono */}
-            <div className="relative w-80">
+          <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 items-center">
+            <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
                 placeholder="Buscar por cliente o motocicleta"
@@ -75,21 +67,22 @@ const ReservasFinalizadas = () => {
             <Button
               variant="outline"
               onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="w-full sm:w-auto"
             >
               Ordenar {sortOrder === "asc" ? <ChevronUp className="h-4 w-4 inline-block" /> : <ChevronDown className="h-4 w-4 inline-block" />}
             </Button>
           </div>
 
-          {/* Tabla de reservas */}
-          <div className="overflow-x-auto">
+          {/* Tabla en pantallas grandes */}
+          <div className="overflow-x-auto hidden sm:block">
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead className="hidden sm:table-cell">Motocicleta</TableHead>
+                  <TableHead>Motocicleta</TableHead>
                   <TableHead>Servicio</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
@@ -98,9 +91,9 @@ const ReservasFinalizadas = () => {
                   <TableRow key={reserva.id}>
                     <TableCell>{reserva.id}</TableCell>
                     <TableCell>{reserva.cliente}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{reserva.moto}</TableCell>
+                    <TableCell>{reserva.moto}</TableCell>
                     <TableCell>{reserva.servicio}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{reserva.fecha}</TableCell>
+                    <TableCell>{reserva.fecha}</TableCell>
                     <TableCell>
                       <Badge variant="default">{reserva.estado}</Badge>
                     </TableCell>
@@ -108,6 +101,21 @@ const ReservasFinalizadas = () => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Tarjetas en móviles */}
+          <div className="sm:hidden space-y-4">
+            {sortedReservas.map((reserva) => (
+              <div key={reserva.id} className="bg-white rounded-lg shadow-md p-4">
+                <p className="font-medium">{reserva.cliente}</p>
+                <p className="text-sm text-gray-600"><strong>Motocicleta:</strong> {reserva.moto}</p>
+                <p className="text-sm text-gray-600"><strong>Servicio:</strong> {reserva.servicio}</p>
+                <p className="text-sm text-gray-600"><strong>Fecha:</strong> {reserva.fecha}</p>
+                <p className="text-sm">
+                  <strong>Estado:</strong> <Badge variant="default">{reserva.estado}</Badge>
+                </p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

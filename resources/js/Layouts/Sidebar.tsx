@@ -201,11 +201,11 @@ const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname 
       >
         {/* Header */}
         <div className="p-4 border-b">
-          <div className="flex items-center space-x-2">
-            <Car size={28} className="text-primary" />
-            <h1 className="text-xl font-bold">Rudolf Motors</h1>
+          <div className="flex items-center justify-center">
+            <Link href="/" className="h-12">
+              <img src="/logo.png" alt="Rudolf Motors Logo" className="h-14" />
+            </Link>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Premium Auto Management</p>
         </div>
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1.5">

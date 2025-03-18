@@ -545,10 +545,10 @@ export default function Header() {
           </Sheet>
 
           {/* Logo */}
-          <div className="flex items-center">
-            <a href="/" className="flex items-center">
-              <span className="ml-2 text-xl font-bold hidden sm:inline-block">Rudolf Motors</span>
-            </a>
+          <div className="flex items-center justify-center">
+            <Link href="/" className="h-12">
+              <img src="/logo.png" alt="Rudolf Motors Logo" className="h-14" />
+            </Link>
           </div>
 
           {/* Navegación del escritorio */}

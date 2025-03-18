@@ -20,44 +20,14 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 const NuevosPedidos = () => {
   const [pedidos, setPedidos] = useState([
-    {
-      id: 1,
-      cliente: "Juan Pérez",
-      moto: "Honda CBR 600",
-      servicio: "Cambio de aceite",
-      fecha: "2024-03-10",
-      estado: "Pendiente",
-    },
-    {
-      id: 2,
-      cliente: "María Gómez",
-      moto: "Yamaha R3",
-      servicio: "Revisión general",
-      fecha: "2024-03-12",
-      estado: "En reparación",
-    },
-    {
-      id: 3,
-      cliente: "Carlos Ruiz",
-      moto: "Suzuki GSX-R750",
-      servicio: "Cambio de frenos",
-      fecha: "2024-03-14",
-      estado: "Listo para entrega",
-    },
-    {
-      id: 4,
-      cliente: "Ana López",
-      moto: "Kawasaki Ninja 400",
-      servicio: "Reparación de motor",
-      fecha: "2024-03-15",
-      estado: "Cancelado",
-    },
+    { id: 1, cliente: "Juan Pérez", moto: "Honda CBR 600", servicio: "Cambio de aceite", fecha: "2024-03-10", estado: "Pendiente" },
+    { id: 2, cliente: "María Gómez", moto: "Yamaha R3", servicio: "Revisión general", fecha: "2024-03-12", estado: "En reparación" },
+    { id: 3, cliente: "Carlos Ruiz", moto: "Suzuki GSX-R750", servicio: "Cambio de frenos", fecha: "2024-03-14", estado: "Listo para entrega" },
+    { id: 4, cliente: "Ana López", moto: "Kawasaki Ninja 400", servicio: "Reparación de motor", fecha: "2024-03-15", estado: "Cancelado" },
   ]);
 
-  // Estado para manejar filas expandidas
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
-  // Función para expandir/colapsar una fila
   const toggleRow = (id: number) => {
     setExpandedRows((prev) =>
       prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
@@ -72,29 +42,27 @@ const NuevosPedidos = () => {
           <CardDescription>Gestión de reparaciones y mantenimientos.</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Tabla de pedidos */}
           <div className="overflow-x-auto">
             <Table className="min-w-full">
-              <TableHeader>
+              <TableHeader className="hidden sm:table-header-group">
                 <TableRow>
-                  <TableHead className="hidden sm:table-cell">ID</TableHead>
+                  <TableHead>ID</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead className="hidden sm:table-cell">Motocicleta</TableHead>
+                  <TableHead>Motocicleta</TableHead>
                   <TableHead>Servicio</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead className="sm:hidden">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pedidos.map((pedido) => (
                   <React.Fragment key={pedido.id}>
-                    <TableRow>
-                      <TableCell className="hidden sm:table-cell">{pedido.id}</TableCell>
+                    <TableRow className="sm:table-row hidden">
+                      <TableCell>{pedido.id}</TableCell>
                       <TableCell>{pedido.cliente}</TableCell>
-                      <TableCell className="hidden sm:table-cell">{pedido.moto}</TableCell>
+                      <TableCell>{pedido.moto}</TableCell>
                       <TableCell>{pedido.servicio}</TableCell>
-                      <TableCell className="hidden sm:table-cell">{pedido.fecha}</TableCell>
+                      <TableCell>{pedido.fecha}</TableCell>
                       <TableCell>
                         <Badge
                           variant={
@@ -110,7 +78,12 @@ const NuevosPedidos = () => {
                           {pedido.estado}
                         </Badge>
                       </TableCell>
-                      <TableCell className="sm:hidden">
+                    </TableRow>
+
+                    {/* Diseño de tarjeta en móvil */}
+                    <div className="sm:hidden bg-white rounded-lg shadow-md p-4 mb-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium">{pedido.cliente}</p>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -123,33 +96,31 @@ const NuevosPedidos = () => {
                             <ChevronDown className="h-4 w-4" />
                           )}
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                    {/* Detalles expandibles */}
-                    {expandedRows.includes(pedido.id) && (
-                      <TableRow className="sm:hidden">
-                        <TableCell colSpan={7} className="p-4 bg-muted/50">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-sm font-medium">ID:</p>
-                              <p className="text-sm">{pedido.id}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Motocicleta:</p>
-                              <p className="text-sm">{pedido.moto}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Servicio:</p>
-                              <p className="text-sm">{pedido.servicio}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Fecha:</p>
-                              <p className="text-sm">{pedido.fecha}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
+                      </div>
+                      {expandedRows.includes(pedido.id) && (
+                        <div className="mt-2 space-y-2">
+                          <p className="text-sm"><strong>Motocicleta:</strong> {pedido.moto}</p>
+                          <p className="text-sm"><strong>Servicio:</strong> {pedido.servicio}</p>
+                          <p className="text-sm"><strong>Fecha:</strong> {pedido.fecha}</p>
+                          <p className="text-sm">
+                            <strong>Estado:</strong>{" "}
+                            <Badge
+                              variant={
+                                pedido.estado === "Pendiente"
+                                  ? "secondary"
+                                  : pedido.estado === "En reparación"
+                                  ? "outline"
+                                  : pedido.estado === "Listo para entrega"
+                                  ? "default"
+                                  : "destructive"
+                              }
+                            >
+                              {pedido.estado}
+                            </Badge>
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </React.Fragment>
                 ))}
               </TableBody>

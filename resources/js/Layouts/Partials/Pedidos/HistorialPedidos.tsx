@@ -72,15 +72,15 @@ const HistorialPedidos = () => {
         </CardHeader>
         <CardContent>
           {/* Filtros */}
-          <div className="flex gap-4 mb-4 flex-wrap">
+          <div className="flex flex-wrap gap-2 sm:gap-4 mb-4">
             <Input
               placeholder="Buscar por cliente"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-80"
+              className="w-full sm:w-80"
             />
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
@@ -88,32 +88,36 @@ const HistorialPedidos = () => {
                 <SelectItem value="Cancelado">Cancelado</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+            <Button
+              variant="outline"
+              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              className="w-full sm:w-auto"
+            >
               Ordenar por fecha {sortOrder === "asc" ? <ChevronUp className="h-4 w-4 inline-block" /> : <ChevronDown className="h-4 w-4 inline-block" />}
             </Button>
           </div>
 
-          {/* Tabla de servicios */}
-          <div className="overflow-x-auto">
+          {/* Tabla en pantallas grandes */}
+          <div className="overflow-x-auto hidden sm:block">
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="hidden sm:table-cell">ID</TableHead>
+                  <TableHead>ID</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead className="hidden sm:table-cell">Motocicleta</TableHead>
+                  <TableHead>Motocicleta</TableHead>
                   <TableHead>Servicio</TableHead>
-                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedPedidos.map((pedido) => (
                   <TableRow key={pedido.id}>
-                    <TableCell className="hidden sm:table-cell">{pedido.id}</TableCell>
+                    <TableCell>{pedido.id}</TableCell>
                     <TableCell>{pedido.cliente}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{pedido.moto}</TableCell>
+                    <TableCell>{pedido.moto}</TableCell>
                     <TableCell>{pedido.servicio}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{pedido.fecha}</TableCell>
+                    <TableCell>{pedido.fecha}</TableCell>
                     <TableCell>
                       <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
                     </TableCell>
@@ -121,6 +125,21 @@ const HistorialPedidos = () => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Vista en tarjetas para móviles */}
+          <div className="sm:hidden space-y-4">
+            {sortedPedidos.map((pedido) => (
+              <div key={pedido.id} className="bg-white rounded-lg shadow-md p-4">
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{pedido.cliente}</p>
+                  <Badge variant={getBadgeVariant(pedido.estado)}>{pedido.estado}</Badge>
+                </div>
+                <p className="text-sm text-gray-600"><strong>Motocicleta:</strong> {pedido.moto}</p>
+                <p className="text-sm text-gray-600"><strong>Servicio:</strong> {pedido.servicio}</p>
+                <p className="text-sm text-gray-600"><strong>Fecha:</strong> {pedido.fecha}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

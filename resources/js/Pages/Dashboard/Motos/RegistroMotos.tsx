@@ -10,12 +10,19 @@ interface RegistroMotosPageProps {
             email: string;
         };
     };
+    motos: Array<{
+        id: number;
+        año: number;
+        modelo: string;
+        marca: string;
+        estado: string;
+    }>;
 }
 
-const RegistroMotosPage = ({ auth }: RegistroMotosPageProps) => {
+const RegistroMotosPage = ({ auth, motos }: RegistroMotosPageProps) => {
     return (
         <DashboardLayout auth={auth}>
-            <RegistroMotos />
+            <RegistroMotos motos={motos} />
         </DashboardLayout>
     );
 };

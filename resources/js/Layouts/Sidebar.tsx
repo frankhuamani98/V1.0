@@ -136,7 +136,7 @@ const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname 
       label: "Gestión de Motos",
       subItems: [
         { label: "Registro de Motos", href: "/motos/registro" },
-        { label: "Historial de Motos", href: "/motos/historial" },
+
       ],
     },
     {

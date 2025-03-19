@@ -8,7 +8,7 @@ use App\Http\Controllers\Usuarios\{ListaUsuariosController, AdministradoresContr
 use App\Http\Controllers\Productos\{AgregarProductoController, InventarioProductosController};
 use App\Http\Controllers\Categorias\{CategoriasPrincipalesController, SubcategoriasController, ListaCategoriasController};
 use App\Http\Controllers\Reservas\{NuevasReservasController, EstadoReservasController, ReservasFinalizadasController, HistorialReservasController};
-use App\Http\Controllers\Moto\{RegistroMotosController, HistorialMotosController};
+use App\Http\Controllers\Moto\{RegistroMotosController};
 use App\Http\Controllers\Facturacion\{FacturasPendientesController, HistorialFacturasController};
 use App\Http\Controllers\Soporte\{ManualUsuarioController, SoporteTecnicoController};
 use App\Http\Controllers\Comentarios\{ListaComentariosController};
@@ -80,9 +80,10 @@ Route::prefix('reservas')->group(function () {
 // Rutas de Motos
 Route::prefix('motos')->group(function () {
     Route::get('/registro', [RegistroMotosController::class, 'index'])->name('motos.registro');
-    Route::get('/historial', [HistorialMotosController::class, 'index'])->name('motos.historial');
+    Route::post('/registro', [RegistroMotosController::class, 'store'])->name('motos.store');
+    Route::put('/registro/{moto}', [RegistroMotosController::class, 'update'])->name('motos.update');
+    Route::delete('/registro/{moto}', [RegistroMotosController::class, 'destroy'])->name('motos.destroy');
 });
-
 // Rutas de Facturación
 Route::prefix('facturacion')->group(function () {
     Route::get('/pendientes', [FacturasPendientesController::class, 'index'])->name('facturacion.pendientes');

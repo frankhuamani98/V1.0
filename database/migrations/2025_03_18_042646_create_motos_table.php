@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('motos', function (Blueprint $table) {
             $table->id();
             $table->integer('año'); // Año de la moto
-            $table->string('modelo')->unique(); // Modelo único
-            $table->string('marca')->unique(); // Marca única
+            $table->string('modelo'); // Modelo único
+            $table->string('marca'); // Marca única
             $table->string('estado'); // Estado de la moto
             $table->timestamps(); // created_at y updated_at
         });

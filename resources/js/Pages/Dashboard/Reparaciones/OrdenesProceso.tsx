@@ -1,9 +1,9 @@
 import React from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import ComentariosNoAprobados from '@/Layouts/Partials/Comentarios/ComentariosNoAprobados';
+import OrdenesProceso from '@/Layouts/Partials/Reparaciones/OrdenesProceso';
 
 // Definir las props que recibe el componente
-interface ComentariosNoAprobadosPageProps {
+interface OrdenesProcesoPageProps {
     auth: {
         user: {
             username: string;
@@ -12,12 +12,12 @@ interface ComentariosNoAprobadosPageProps {
     };
 }
 
-const ComentariosNoAprobadosPage = ({ auth }: ComentariosNoAprobadosPageProps) => {
+const OrdenesProcesoPage = ({ auth }: OrdenesProcesoPageProps) => {
     return (
         <DashboardLayout auth={auth}>
-            <ComentariosNoAprobados />
+            <OrdenesProceso />
         </DashboardLayout>
     );
 };
 
-export default ComentariosNoAprobadosPage;
+export default OrdenesProcesoPage;

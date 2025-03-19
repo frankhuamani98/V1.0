@@ -11,9 +11,9 @@ use App\Http\Controllers\Reservas\{NuevasReservasController, EstadoReservasContr
 use App\Http\Controllers\Moto\{RegistroMotosController, HistorialMotosController};
 use App\Http\Controllers\Facturacion\{FacturasPendientesController, HistorialFacturasController};
 use App\Http\Controllers\Soporte\{ManualUsuarioController, SoporteTecnicoController};
-use App\Http\Controllers\Comentarios\{ListaComentariosController, ComentariosAprobadosController, ComentariosNoAprobadosController};
-use App\Http\Controllers\Descuentos\{SubirDescuentoController, RuletasDescuentosController};
-use App\Http\Controllers\Publicidad\{SubirPublicidadController, HistorialPublicidadesController};
+use App\Http\Controllers\Comentarios\{ListaComentariosController};
+use App\Http\Controllers\Reparaciones\{HistorialReparacionesController, OrdenesFinalizadasController, OrdenesProcesoController};
+use App\Http\Controllers\Tecnicos\{ListaTecnicosController, AsignarReparacionesController, HistorialTecnicosController};
 use App\Http\Controllers\Pedidos\{EstadoPedidosController, NuevosPedidosController, PedidosFinalizadosController, HistorialPedidosController};
 
 // Ruta principal
@@ -102,17 +102,21 @@ Route::prefix('comentarios')->group(function () {
     Route::get('/no-aprobados', [ComentariosNoAprobadosController::class, 'index'])->name('comentarios.no-aprobados');
 });
 
-// Rutas de Descuentos
-Route::prefix('descuentos')->group(function () {
-    Route::get('/subir', [SubirDescuentoController::class, 'index'])->name('descuentos.subir');
-    Route::get('/ruletas', [RuletasDescuentosController::class, 'index'])->name('descuentos.ruletas');
+// Rutas de Reparaciones
+Route::prefix('reparaciones')->group(function () {
+    Route::get('/proceso', [OrdenesProcesoController::class, 'index'])->name('reparaciones.proceso');
+    Route::get('/finalizadas', [OrdenesFinalizadasController::class, 'index'])->name('reparaciones.finalizadas');
+    Route::get('/historial', [HistorialReparacionesController::class, 'index'])->name('reparaciones.historial');
 });
 
-// Rutas de Publicidad
-Route::prefix('publicidad')->group(function () {
-    Route::get('/subir', [SubirPublicidadController::class, 'index'])->name('publicidad.subir');
-    Route::get('/historial', [HistorialPublicidadesController::class, 'index'])->name('publicidad.historial');
+
+// Rutas de Técnicos
+Route::prefix('tecnicos')->group(function () {
+    Route::get('/lista', [ListaTecnicosController::class, 'index'])->name('tecnicos.lista');
+    Route::get('/asignar', [AsignarReparacionesController::class, 'index'])->name('tecnicos.asignar');
+    Route::get('/historial', [HistorialTecnicosController::class, 'index'])->name('tecnicos.historial');
 });
+
 
 // Rutas de pedidos
 Route::prefix('pedidos')->group(function () {

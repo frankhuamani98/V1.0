@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
-import { ChevronDown, ChevronRight, Home, LogOut, Car, Users, BarChart as ChartBar, Cog, Menu, FileText, CreditCard, Bell, HelpCircle, UserPlus, Truck, Calendar, BarChart2, PieChart, TrendingUp, Layers, MessageCircle, Tag, Megaphone, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, Home, LogOut, Car, Users, BarChart as ChartBar, Cog, Menu, FileText, CreditCard, Bell, HelpCircle, UserPlus, Truck, Calendar, BarChart2, PieChart, TrendingUp, Layers, MessageCircle, Tag, Megaphone, Package, Wrench , Briefcase } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -144,24 +144,24 @@ const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname 
       label: "Gestión de Comentarios",
       subItems: [
         { label: "Lista de Comentarios", href: "/comentarios/lista" },
-        { label: "Comentarios Aprobados", href: "/comentarios/aprobados" },
-        { label: "Comentarios No Aprobados", href: "/comentarios/no-aprobados" },
       ],
     },
     {
-      icon: <Tag size={20} />,
-      label: "Gestión de Descuentos",
+      icon: <Wrench size={20} />,
+      label: "Gestión de Reparaciones",
       subItems: [
-        { label: "Subir un Descuento", href: "/descuentos/subir" },
-        { label: "Ruletas de Descuentos", href: "/descuentos/ruletas" },
+        { label: "Órdenes en Proceso", href: "/reparaciones/proceso" },
+        { label: "Órdenes Finalizadas", href: "/reparaciones/finalizadas" },
+        { label: "Historial de Reparaciones", href: "/reparaciones/historial" },
       ],
     },
     {
-      icon: <Megaphone size={20} />,
-      label: "Gestión de Publicidad",
+      icon: <Briefcase size={20} />,
+      label: "Gestión de Técnicos",
       subItems: [
-        { label: "Subir una Publicidad", href: "/publicidad/subir" },
-        { label: "Historial de Publicidades", href: "/publicidad/historial" },
+        { label: "Lista de Técnicos", href: "/tecnicos/lista" },
+        { label: "Asignar Reparaciones", href: "/tecnicos/asignar" },
+        { label: "Historial de Reparaciones", href: "/tecnicos/historial" },
       ],
     },
     {

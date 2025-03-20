@@ -134,11 +134,14 @@ const ListaUsuarios = () => {
       status: formData.get("status") as string,
     };
 
-    setUsuarios((prevUsuarios) =>
-      prevUsuarios.map((usuario) =>
-        usuario.id === usuarioSeleccionado?.id ? datosActualizados : usuario
-      )
-    );
+  setUsuarios((prevUsuarios) =>
+  prevUsuarios.map((usuario) =>
+    usuarioSeleccionado && usuario.id === usuarioSeleccionado.id
+      ? { ...usuario, ...datosActualizados }
+      : usuario
+  )
+);
+
 
     cerrarModal();
     console.log("Usuario actualizado:", datosActualizados);

@@ -5,11 +5,13 @@ import { Button } from "@/Components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { Textarea } from "@/Components/ui/textarea";
 import { Switch } from "@/Components/ui/switch";
+import { QRCodeSVG } from "qrcode.react"; // Usa QRCodeSVG en lugar de QRCode
 
 const AgregarProducto = () => {
   const [formData, setFormData] = useState({
     codigo: "",
     nombre: "",
+    qr: "",
     categoria: "",
     subcategoria: "",
     detalles: "",
@@ -31,6 +33,16 @@ const AgregarProducto = () => {
       ...formData,
       [name]: value,
     });
+
+    // Si el campo es "codigo", generamos el QR y el nombre automáticamente
+    if (name === "codigo") {
+      const nombreGenerado = `Producto ${value}`; // Generamos un nombre basado en el código
+      setFormData((prev) => ({
+        ...prev,
+        qr: value, // El QR será igual al código ingresado
+        nombre: nombreGenerado, // Autocompletamos el nombre
+      }));
+    }
   };
 
   const handleSwitchChange = (name: string, checked: boolean) => {
@@ -46,6 +58,30 @@ const AgregarProducto = () => {
     // Aquí puedes agregar la lógica para enviar los datos al backend
   };
 
+  const generarCodigo = () => {
+    const codigo = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const nombreGenerado = `Producto ${codigo}`; // Generamos un nombre basado en el código
+    setFormData({
+      ...formData,
+      codigo: codigo,
+      qr: codigo, // Asignamos el mismo código al QR
+      nombre: nombreGenerado, // Autocompletamos el nombre
+    });
+  };
+
+  // Función para simular el escaneo de un QR
+  const simularEscaneoQR = () => {
+    const qrEscaneado = "PROD-12345|Producto Ejemplo"; // Simulamos un QR escaneado
+    const [codigo, nombre] = qrEscaneado.split("|"); // Separamos el código y el nombre
+
+    setFormData({
+      ...formData,
+      codigo: codigo,
+      nombre: nombre,
+      qr: codigo, // Generamos el QR con el código escaneado
+    });
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold">Agregar Producto</h1>
@@ -56,14 +92,19 @@ const AgregarProducto = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="codigo">Código del Producto</Label>
-            <Input
-              id="codigo"
-              name="codigo"
-              value={formData.codigo}
-              onChange={handleChange}
-              placeholder="Ingrese el código del producto"
-              required
-            />
+            <div className="flex space-x-2">
+              <Input
+                id="codigo"
+                name="codigo"
+                value={formData.codigo}
+                onChange={handleChange}
+                placeholder="Ingrese el código o genere uno"
+                required
+              />
+              <Button type="button" onClick={generarCodigo}>
+                Generar Código
+              </Button>
+            </div>
           </div>
           <div>
             <Label htmlFor="nombre">Nombre del Producto</Label>
@@ -76,6 +117,30 @@ const AgregarProducto = () => {
               required
             />
           </div>
+          <div>
+            <Label htmlFor="qr">Código QR</Label>
+            <div className="flex items-center space-x-2">
+              <Input
+                id="qr"
+                name="qr"
+                value={formData.qr}
+                onChange={handleChange}
+                placeholder="Código QR generado automáticamente"
+                readOnly
+              />
+              {formData.qr && (
+                <div className="p-2 border rounded">
+                  <QRCodeSVG value={formData.qr} size={64} /> {/* Mostrar el QR */}
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            <Button type="button" onClick={simularEscaneoQR}>
+              Simular Escaneo de QR
+            </Button>
+          </div>
+          {/* Resto del formulario */}
           <div>
             <Label htmlFor="fotoUrl">URL de la Foto</Label>
             <Input

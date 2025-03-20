@@ -5,7 +5,7 @@ import { Button } from "@/Components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { Textarea } from "@/Components/ui/textarea";
 import { Switch } from "@/Components/ui/switch";
-import { QRCodeSVG } from "qrcode.react"; // Usa QRCodeSVG en lugar de QRCode
+import { QRCodeSVG } from "qrcode.react"; 
 
 const AgregarProducto = () => {
   const [formData, setFormData] = useState({

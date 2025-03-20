@@ -49,7 +49,7 @@ const facturasMock: Factura[] = [
 
 const FacturasPendientes = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [facturas] = useState<Factura[]>(facturasMock);
+  const [facturas, setFacturas] = useState<Factura[]>(facturasMock);
   const [showNewInvoiceForm, setShowNewInvoiceForm] = useState(false);
   const [showActions, setShowActions] = useState<string | null>(null);
   const [newInvoice, setNewInvoice] = useState({
@@ -60,9 +60,29 @@ const FacturasPendientes = () => {
     fechaVencimiento: '',
     descripcion: ''
   });
+  const [filters, setFilters] = useState<{ estado: 'pendiente' | 'vencida' | 'todos' }>({ estado: 'todos' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Factura | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingInvoice) {
+      // Actualizar factura existente
+      const updatedFacturas = facturas.map((factura) =>
+        factura.id === editingInvoice.id ? { ...factura, ...newInvoice, monto: parseFloat(newInvoice.monto) } : factura
+      );
+      setFacturas(updatedFacturas);
+      setEditingInvoice(null);
+    } else {
+      // Agregar nueva factura
+      const newFactura: Factura = {
+        id: String(facturas.length + 1),
+        ...newInvoice,
+        monto: parseFloat(newInvoice.monto),
+        estado: 'pendiente'
+      };
+      setFacturas([...facturas, newFactura]);
+    }
     setShowNewInvoiceForm(false);
     setNewInvoice({
       numero: '',
@@ -78,6 +98,48 @@ const FacturasPendientes = () => {
     setShowActions(showActions === id ? null : id);
   };
 
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const handleFilterChange = (estado: 'pendiente' | 'vencida' | 'todos') => {
+    setFilters({ estado });
+    setShowFilters(false);
+  };
+
+  const handleEdit = (factura: Factura) => {
+    setEditingInvoice(factura);
+    setNewInvoice({
+      numero: factura.numero,
+      cliente: factura.cliente,
+      monto: String(factura.monto),
+      fechaEmision: factura.fechaEmision,
+      fechaVencimiento: factura.fechaVencimiento,
+      descripcion: factura.descripcion || ''
+    });
+    setShowNewInvoiceForm(true);
+  };
+
+  const handleDownload = (factura: Factura) => {
+    // Simular descarga de factura
+    const blob = new Blob([`Factura: ${factura.numero}\nCliente: ${factura.cliente}\nMonto: $${factura.monto.toFixed(2)}\nFecha Emisión: ${factura.fechaEmision}\nFecha Vencimiento: ${factura.fechaVencimiento}\nDescripción: ${factura.descripcion || ''}`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Factura_${factura.numero}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDelete = (id: string) => {
+    setFacturas(facturas.filter((factura) => factura.id !== id));
+  };
+
+  const filteredFacturas = facturas.filter((factura) => {
+    if (filters.estado === 'todos') return true;
+    return factura.estado === filters.estado;
+  });
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Modal para nueva factura */}
@@ -86,7 +148,9 @@ const FacturasPendientes = () => {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-900">Nueva Factura</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {editingInvoice ? 'Editar Factura' : 'Nueva Factura'}
+                </h2>
                 <button
                   onClick={() => setShowNewInvoiceForm(false)}
                   className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -231,10 +295,37 @@ const FacturasPendientes = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-                <Filter size={20} />
-                <span className="hidden sm:inline">Filtros</span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={toggleFilters}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 bg-gradient-to-r from-blue-800 to-blue-900 text-white hover:from-blue-900 hover:to-blue-950 shadow-lg hover:shadow-xl"
+                >
+                  <Filter size={20} />
+                  <span className="hidden sm:inline">Filtros</span>
+                </button>
+                {showFilters && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-10">
+                    <button
+                      onClick={() => handleFilterChange('todos')}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors"
+                    >
+                      Todos
+                    </button>
+                    <button
+                      onClick={() => handleFilterChange('pendiente')}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
+                    >
+                      Pendientes
+                    </button>
+                    <button
+                      onClick={() => handleFilterChange('vencida')}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors"
+                    >
+                      Vencidas
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setShowNewInvoiceForm(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-800 to-blue-900 text-white rounded-lg hover:from-blue-900 hover:to-blue-950 transition-all shadow-lg hover:shadow-xl"
@@ -246,8 +337,8 @@ const FacturasPendientes = () => {
           </div>
 
           {/* Mobile View */}
-          <div className="sm:hidden space-y-4">
-            {facturas.map((factura) => (
+          <div className="sm:hidden space-y-2">
+            {filteredFacturas.map((factura) => (
               <div key={factura.id} className="bg-white border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center">
@@ -263,15 +354,24 @@ const FacturasPendientes = () => {
                     </button>
                     {showActions === factura.id && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                        <button className="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(factura)}
+                          className="w-full px-2 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2"
+                        >
                           <Edit3 size={16} />
                           Editar
                         </button>
-                        <button className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2">
+                        <button
+                          onClick={() => handleDownload(factura)}
+                          className="w-full px-2 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
+                        >
                           <Download size={16} />
                           Descargar
                         </button>
-                        <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <button
+                          onClick={() => handleDelete(factura.id)}
+                          className="w-full px-2 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        >
                           <Trash2 size={16} />
                           Eliminar
                         </button>
@@ -312,7 +412,7 @@ const FacturasPendientes = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {facturas.map((factura) => (
+                {filteredFacturas.map((factura) => (
                   <tr key={factura.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -337,13 +437,22 @@ const FacturasPendientes = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors">
+                        <button
+                          onClick={() => handleEdit(factura)}
+                          className="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+                        >
                           <Edit3 size={18} />
                         </button>
-                        <button className="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-lg hover:bg-green-100 transition-colors">
+                        <button
+                          onClick={() => handleDownload(factura)}
+                          className="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-lg hover:bg-green-100 transition-colors"
+                        >
                           <Download size={18} />
                         </button>
-                        <button className="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition-colors">
+                        <button
+                          onClick={() => handleDelete(factura.id)}
+                          className="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg hover:bg-red-100 transition-colors"
+                        >
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -356,7 +465,7 @@ const FacturasPendientes = () => {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
             <div className="text-sm text-gray-700">
-              Mostrando <span className="font-medium">1</span> a <span className="font-medium">2</span> de <span className="font-medium">2</span> resultados
+              Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredFacturas.length}</span> de <span className="font-medium">{filteredFacturas.length}</span> resultados
             </div>
             <div className="flex gap-2">
               <button className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors">

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\{RegisterController, LoginController};
 use App\Http\Controllers\{DashboardController};
-use App\Http\Controllers\Usuarios\{ListaUsuariosController, AdministradoresController, TodosUsuariosController};
+use App\Http\Controllers\Usuarios\{ListaUsuariosController, AdministradoresController};
 use App\Http\Controllers\Productos\{AgregarProductoController, InventarioProductosController};
 use App\Http\Controllers\Categorias\{CategoriasPrincipalesController, SubcategoriasController, ListaCategoriasController};
 use App\Http\Controllers\Reservas\{NuevasReservasController, EstadoReservasController, ReservasFinalizadasController, HistorialReservasController};
@@ -41,7 +41,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::prefix('usuarios')->group(function () {
     Route::get('/', [ListaUsuariosController::class, 'index'])->name('usuarios');
     Route::get('/administradores', [AdministradoresController::class, 'index'])->name('usuarios.administradores');
-    Route::get('/todos', [TodosUsuariosController::class, 'index'])->name('usuarios.todos');
+
 });
 
 // Rutas de Productos
@@ -99,8 +99,7 @@ Route::prefix('soporte')->group(function () {
 // Rutas de Comentarios
 Route::prefix('comentarios')->group(function () {
     Route::get('/lista', [ListaComentariosController::class, 'index'])->name('comentarios.lista');
-    Route::get('/aprobados', [ComentariosAprobadosController::class, 'index'])->name('comentarios.aprobados');
-    Route::get('/no-aprobados', [ComentariosNoAprobadosController::class, 'index'])->name('comentarios.no-aprobados');
+
 });
 
 // Rutas de Reparaciones

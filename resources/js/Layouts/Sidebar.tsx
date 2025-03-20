@@ -111,7 +111,6 @@ const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname 
       subItems: [
         { label: "Lista de Usuarios", href: "/usuarios" },
         { label: "Administradores", href: "/usuarios/administradores" },
-        { label: "Todos los Usuarios", href: "/usuarios/todos" },
       ],
     },
     {

@@ -87,19 +87,19 @@ const EstadoReservas = () => {
         </CardHeader>
         <CardContent>
           {/* Barra de búsqueda y filtros */}
-          <div className="flex flex-wrap gap-4 mb-4 items-center">
-            <div className="relative w-80">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+            <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
                 placeholder="Buscar por cliente o motocicleta"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>

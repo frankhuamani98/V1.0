@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/Components/ui/select";
-import { Calendar, Wrench, Search, Download } from "lucide-react";
+import { Calendar, Wrench, Search, Download, ChevronDown } from "lucide-react";
 
 interface Reparacion {
   id: number;
@@ -46,78 +46,123 @@ const HistorialReparaciones = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTecnico, setSelectedTecnico] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
 
+  // Filtrar reparaciones según búsqueda, técnico y fecha
   const reparacionesFiltradas = reparaciones.filter((reparacion) => {
     const matchesSearch =
       reparacion.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reparacion.servicio.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesTecnico = selectedTecnico ? reparacion.tecnico === selectedTecnico : true;
     const matchesDate = selectedDate ? reparacion.fecha === selectedDate : true;
-
     return matchesSearch && matchesTecnico && matchesDate;
   });
 
+  // Función para exportar historial (simulación)
   const exportarHistorial = () => {
     alert("Exportando historial... (Funcionalidad simulada)");
   };
 
+  // Estados para mostrar badges de colores
+  const getBadgeClass = (estado: string) => {
+    switch (estado) {
+      case "Completada":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "Pendiente":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "En Proceso":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      default:
+        return "";
+    }
+  };
+
+  // Manejo de la limpieza del filtro de técnico
+  const handleTecnicoChange = (value: string) => {
+    // Si es "todos", establecer como undefined
+    setSelectedTecnico(value === "todos" ? undefined : value);
+  };
+
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Wrench className="inline-block mr-2 h-6 w-6" /> Historial de Reparaciones
+    <div className="p-2 sm:p-4 md:p-6 max-w-full">
+      <Card className="w-full shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl md:text-2xl flex items-center">
+            <Wrench className="inline-block mr-2 h-5 w-5 md:h-6 md:w-6" /> Historial de Reparaciones
           </CardTitle>
-          <CardDescription>Consulta todas las reparaciones realizadas en el taller.</CardDescription>
+          <CardDescription className="text-sm md:text-base">
+            Consulta todas las reparaciones realizadas en el taller.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Búsqueda y filtros */}
-          <div className="flex flex-wrap gap-4 mb-4 items-center justify-between">
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          {/* Búsqueda y toggles de filtros responsive */}
+          <div className="flex flex-col space-y-3 mb-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Buscar por cliente o servicio"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-9 w-full text-sm"
               />
             </div>
-
-            <Select value={selectedTecnico} onValueChange={setSelectedTecnico}>
-              <SelectTrigger className="w-full sm:w-60">
-                <SelectValue placeholder="Filtrar por técnico" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from(new Set(reparaciones.map((r) => r.tecnico))).map((tecnico) => (
-                  <SelectItem key={tecnico} value={tecnico}>
-                    {tecnico}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="relative w-full sm:w-40">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="pl-10"
-              />
+            
+            <div className="flex justify-between items-center w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowFilters(!showFilters)}
+                className="text-xs md:text-sm flex items-center"
+              >
+                <ChevronDown className={`h-4 w-4 mr-1 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+              </Button>
+              
+              <Button 
+                className="ml-auto bg-blue-600 text-white hover:bg-blue-700 text-xs md:text-sm" 
+                size="sm"
+                onClick={exportarHistorial}
+              >
+                <Download className="h-4 w-4 mr-1" /> Exportar
+              </Button>
             </div>
-
-            <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700" onClick={exportarHistorial}>
-              <Download className="h-5 w-5 mr-2" /> Exportar
-            </Button>
+            
+            {/* Filtros expandibles */}
+            {showFilters && (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={selectedTecnico || "todos"} onValueChange={handleTecnicoChange}>
+                  <SelectTrigger className="w-full sm:w-56 text-sm">
+                    <SelectValue placeholder="Filtrar por técnico" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos los técnicos</SelectItem>
+                    {Array.from(new Set(reparaciones.map((r) => r.tecnico))).map((tecnico) => (
+                      <SelectItem key={tecnico} value={tecnico}>
+                        {tecnico}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <div className="relative w-full sm:w-40">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="pl-9 text-sm"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Tabla en pantallas grandes */}
+          {/* Tabla en pantallas medianas y grandes */}
           <div className="overflow-x-auto hidden sm:block">
-            <Table className="min-w-full">
+            <Table className="min-w-full text-sm">
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  <TableHead className="w-10">ID</TableHead>
                   <TableHead>Técnico</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Servicio</TableHead>
@@ -129,13 +174,15 @@ const HistorialReparaciones = () => {
                 {reparacionesFiltradas.length > 0 ? (
                   reparacionesFiltradas.map((reparacion) => (
                     <TableRow key={reparacion.id}>
-                      <TableCell>{reparacion.id}</TableCell>
+                      <TableCell className="font-medium">{reparacion.id}</TableCell>
                       <TableCell>{reparacion.tecnico}</TableCell>
                       <TableCell>{reparacion.cliente}</TableCell>
                       <TableCell>{reparacion.servicio}</TableCell>
                       <TableCell>{reparacion.fecha}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{reparacion.estado}</Badge>
+                        <Badge className={getBadgeClass(reparacion.estado)} variant="outline">
+                          {reparacion.estado}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))
@@ -151,16 +198,29 @@ const HistorialReparaciones = () => {
           </div>
 
           {/* Tarjetas en móviles */}
-          <div className="sm:hidden grid gap-4 mt-4">
-            {reparacionesFiltradas.map((reparacion) => (
-              <div key={reparacion.id} className="bg-white rounded-lg shadow-md p-4">
-                <p className="font-medium">{reparacion.tecnico}</p>
-                <p className="text-sm"><strong>Cliente:</strong> {reparacion.cliente}</p>
-                <p className="text-sm"><strong>Servicio:</strong> {reparacion.servicio}</p>
-                <p className="text-sm"><strong>Fecha:</strong> {reparacion.fecha}</p>
-                <Badge variant="outline">{reparacion.estado}</Badge>
+          <div className="sm:hidden space-y-3 mt-4">
+            {reparacionesFiltradas.length > 0 ? (
+              reparacionesFiltradas.map((reparacion) => (
+                <div key={reparacion.id} className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-medium text-sm">{reparacion.tecnico}</p>
+                    <Badge className={`${getBadgeClass(reparacion.estado)} text-xs`} variant="outline">
+                      {reparacion.estado}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 text-xs">
+                    <p><span className="font-medium">ID:</span> {reparacion.id}</p>
+                    <p><span className="font-medium">Fecha:</span> {reparacion.fecha}</p>
+                    <p className="col-span-2"><span className="font-medium">Cliente:</span> {reparacion.cliente}</p>
+                    <p className="col-span-2"><span className="font-medium">Servicio:</span> {reparacion.servicio}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center p-4 text-sm text-gray-500">
+                No se encontraron reparaciones.
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>

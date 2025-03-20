@@ -68,18 +68,18 @@ const ListaTecnicos = () => {
   const getBadgeVariant = (estado: string) => {
     switch (estado) {
       case "Disponible":
-        return "default";
+        return "available"; // Verde
       case "Ocupado":
-        return "secondary";
+        return "secondary"; // Amarillo
       case "No Disponible":
-        return "destructive";
+        return "destructive"; // Rojo
       default:
-        return "default";
+        return "outline"; // Si hay un estado inesperado
     }
   };
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>
@@ -89,8 +89,8 @@ const ListaTecnicos = () => {
         </CardHeader>
         <CardContent>
           {/* Barra de búsqueda y filtros */}
-          <div className="flex flex-wrap gap-4 mb-4 items-center">
-            <div className="relative w-80">
+          <div className="flex flex-wrap gap-4 mb-4 items-center justify-between">
+            <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
                 placeholder="Buscar por nombre o especialidad"
@@ -101,7 +101,7 @@ const ListaTecnicos = () => {
             </div>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
@@ -118,7 +118,7 @@ const ListaTecnicos = () => {
               Ordenar {sortOrder === "asc" ? <ChevronUp className="h-4 w-4 inline-block" /> : <ChevronDown className="h-4 w-4 inline-block" />}
             </Button>
 
-            <Button className="ml-auto bg-blue-600 text-white hover:bg-blue-700">
+            <Button className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700">
               <UserPlus className="h-5 w-5 mr-2" /> Agregar Técnico
             </Button>
           </div>
@@ -163,7 +163,7 @@ const ListaTecnicos = () => {
           </div>
 
           {/* Tarjetas para móviles */}
-          <div className="sm:hidden space-y-4">
+          <div className="sm:hidden grid gap-4">
             {sortedTecnicos.map((tecnico) => (
               <div key={tecnico.id} className="bg-white rounded-lg shadow-md p-4">
                 <p className="font-medium">{tecnico.nombre}</p>

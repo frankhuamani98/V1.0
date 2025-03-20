@@ -32,7 +32,7 @@ const InventarioProductos = () => {
               <th className="py-2 px-4">Categoría</th>
               <th className="py-2 px-4">Precio</th>
               <th className="py-2 px-4">Stock</th>
-              <th className="py-2 px-4">Acciones</th>
+              <th className="py-2 px-4">Acciones locas</th>
             </tr>
           </thead>
           <tbody>

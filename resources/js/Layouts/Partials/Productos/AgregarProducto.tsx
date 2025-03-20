@@ -24,7 +24,7 @@ interface FormData {
   masVendido: boolean;
   stock: number;
   color: string;
-  fotosAdicionales: string[]; // Cambiado a un array de strings (URLs)
+  fotosAdicionales: string[]; // Array de URLs
 }
 
 // Datos de ejemplo para categorías y subcategorías
@@ -53,7 +53,7 @@ const AgregarProducto = () => {
     masVendido: false,
     stock: 0,
     color: "",
-    fotosAdicionales: [], // Ahora es un array de strings
+    fotosAdicionales: [], // Array de URLs
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -64,7 +64,7 @@ const AgregarProducto = () => {
   // Actualizar subcategorías cuando cambia la categoría
   useEffect(() => {
     if (formData.categoria) {
-      setSubcategorias(categoriasYSubcategorias[formData.categoria as keyof typeof categoriasYSubcategorias] || []);
+      setSubcategorias(categoriasYSubcategorias[formData.categoria] || []);
       setFormData((prev) => ({ ...prev, subcategoria: "" })); // Resetear subcategoría
     }
   }, [formData.categoria]);
@@ -129,20 +129,12 @@ const AgregarProducto = () => {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      if (files.length > 4) {
-        setErrors((prevErrors) => ({ ...prevErrors, fotosAdicionales: "No se pueden subir más de 4 fotos." }));
-      } else {
-        const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-        setFormData({
-          ...formData,
-          fotosAdicionales: urls,
-        });
-        setErrors((prevErrors) => ({ ...prevErrors, fotosAdicionales: "" }));
-      }
-    }
+  const handleFotosAdicionalesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const urls = e.target.value.split(",").map((url) => url.trim());
+    setFormData({
+      ...formData,
+      fotosAdicionales: urls,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -150,17 +142,7 @@ const AgregarProducto = () => {
 
     if (validateForm()) {
       console.log("Formulario enviado:", formData);
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (key === "fotosAdicionales") {
-          formData.fotosAdicionales.forEach((url, index) => {
-            formDataToSend.append(`fotoAdicional${index + 1}`, url);
-          });
-        } else {
-          formDataToSend.append(key, (formData as any)[key]);
-        }
-      });
-      console.log("Datos para enviar al backend:", formDataToSend);
+      // Aquí puedes enviar los datos al backend
     } else {
       console.log("Errores en el formulario:", errors);
     }
@@ -170,7 +152,7 @@ const AgregarProducto = () => {
     const query = e.target.value;
     setSearchQuery(query);
 
-    // Simulación de búsqueda de motos o modelos relacionados
+    // Simulación de búsqueda de productos relacionados
     const results: { id: number; name: string }[] = [
       { id: 1, name: "Moto A" },
       { id: 2, name: "Moto B" },
@@ -221,6 +203,7 @@ const AgregarProducto = () => {
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-6 bg-white p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Código del Producto */}
           <div>
             <Label htmlFor="codigo">Código del Producto</Label>
 <<<<<<< HEAD
@@ -251,6 +234,7 @@ const AgregarProducto = () => {
 >>>>>>> 8be72d3a4089af4f80b3bb90329a412f8dc27537
           </div>
 
+          {/* Nombre del Producto */}
           <div>
             <Label htmlFor="nombre">Nombre del Producto</Label>
             <Input
@@ -265,6 +249,7 @@ const AgregarProducto = () => {
             {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
           </div>
 
+          {/* URL de la Foto */}
           <div>
             <Label htmlFor="qr">Código QR</Label>
             <div className="flex items-center space-x-2">
@@ -301,6 +286,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Color */}
           <div>
             <Label htmlFor="color">Color</Label>
             <Input
@@ -313,18 +299,14 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Fotos Adicionales */}
           <div>
             <Label htmlFor="fotosAdicionales">Fotos Adicionales (Máx. 4 URLs)</Label>
             <Input
               id="fotosAdicionales"
               name="fotosAdicionales"
               value={formData.fotosAdicionales.join(", ")}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  fotosAdicionales: e.target.value.split(", "),
-                })
-              }
+              onChange={handleFotosAdicionalesChange}
               placeholder="Ingrese las URLs de las fotos adicionales, separadas por comas"
               className="mt-1"
             />
@@ -333,6 +315,7 @@ const AgregarProducto = () => {
             )}
           </div>
 
+          {/* Categoría */}
           <div>
             <Label htmlFor="categoria">Categoría</Label>
             <Select
@@ -353,6 +336,7 @@ const AgregarProducto = () => {
             </Select>
           </div>
 
+          {/* Subcategoría */}
           <div>
             <Label htmlFor="subcategoria">Subcategoría</Label>
             <Select
@@ -376,6 +360,7 @@ const AgregarProducto = () => {
             </Select>
           </div>
 
+          {/* Detalles */}
           <div>
             <Label htmlFor="detalles">Detalles</Label>
             <Textarea
@@ -388,6 +373,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Descripción Corta */}
           <div>
             <Label htmlFor="descripcionCorta">Descripción Corta</Label>
             <Textarea
@@ -400,6 +386,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Precio */}
           <div>
             <Label htmlFor="precio">Precio</Label>
             <Input
@@ -415,6 +402,7 @@ const AgregarProducto = () => {
             {errors.precio && <p className="text-red-500 text-sm mt-1">{errors.precio}</p>}
           </div>
 
+          {/* Descuento */}
           <div>
             <Label htmlFor="descuento">Descuento (%)</Label>
             <Input
@@ -429,6 +417,7 @@ const AgregarProducto = () => {
             {errors.descuento && <p className="text-red-500 text-sm mt-1">{errors.descuento}</p>}
           </div>
 
+          {/* Precio Total */}
           <div>
             <Label htmlFor="precioTotal">Precio Total</Label>
             <Input
@@ -443,6 +432,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Productos Relacionados */}
           <div>
             <Label htmlFor="productosRelacionados">Productos Relacionados</Label>
             <Input
@@ -475,6 +465,7 @@ const AgregarProducto = () => {
             )}
           </div>
 
+          {/* Stock del Producto */}
           <div>
             <Label htmlFor="stock">Stock del Producto</Label>
             <Input
@@ -490,6 +481,7 @@ const AgregarProducto = () => {
             {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
           </div>
 
+          {/* Disponible */}
           <div>
             <Label htmlFor="disponible">Disponible</Label>
             <Switch
@@ -502,6 +494,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Destacado */}
           <div>
             <Label htmlFor="destacado">Destacado</Label>
             <Switch
@@ -514,6 +507,7 @@ const AgregarProducto = () => {
             />
           </div>
 
+          {/* Lo más vendido */}
           <div>
             <Label htmlFor="masVendido">Lo más vendido</Label>
             <Switch
@@ -527,6 +521,7 @@ const AgregarProducto = () => {
           </div>
         </div>
 
+        {/* Botón de envío */}
         <div className="flex justify-end">
           <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
             Agregar Producto

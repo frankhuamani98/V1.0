@@ -1,6 +1,7 @@
 import React, { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./DashboardHeader";
+import Footer from "./DashboardFooter";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -35,6 +36,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, auth }) => 
 
                 {/* Dashboard content */}
                 <main className="flex-1 p-6 overflow-auto">{children}</main>
+                <Footer/>
             </div>
         </div>
     );

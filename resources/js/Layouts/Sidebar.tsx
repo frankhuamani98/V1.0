@@ -146,21 +146,11 @@ const Sidebar = ({ isOpen, toggleSidebar, activeHref = window.location.pathname 
       ],
     },
     {
-      icon: <Wrench size={20} />,
-      label: "Gestión de Reparaciones",
+      icon: <Megaphone size={20} />,
+      label: "Gestión de Banners",
       subItems: [
-        { label: "Órdenes en Proceso", href: "/reparaciones/proceso" },
-        { label: "Órdenes Finalizadas", href: "/reparaciones/finalizadas" },
-        { label: "Historial de Reparaciones", href: "/reparaciones/historial" },
-      ],
-    },
-    {
-      icon: <Briefcase size={20} />,
-      label: "Gestión de Técnicos",
-      subItems: [
-        { label: "Lista de Técnicos", href: "/tecnicos/lista" },
-        { label: "Asignar Reparaciones", href: "/tecnicos/asignar" },
-        { label: "Historial de Reparaciones", href: "/tecnicos/historial" },
+        { label: "Subir un Banners", href: "/banners/subir" },
+        { label: "Historial de Banners", href: "/banners/historial" },
       ],
     },
     {

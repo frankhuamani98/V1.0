@@ -47,6 +47,8 @@ const InventarioProductos = () => {
                   <a href={producto.urlFoto} target="_blank" rel="noopener noreferrer">
                     <i className="fas fa-eye text-blue-500 hover:text-blue-700"></i>
                   </a>
+
+                  
                   <button className="text-yellow-500 hover:text-yellow-700">
                     <i className="fas fa-edit"></i>
                   </button>

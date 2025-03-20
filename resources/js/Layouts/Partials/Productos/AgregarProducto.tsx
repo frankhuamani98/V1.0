@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/Components/ui/button";
@@ -7,8 +7,35 @@ import { Textarea } from "@/Components/ui/textarea";
 import { Switch } from "@/Components/ui/switch";
 import { QRCodeSVG } from "qrcode.react"; // Usa QRCodeSVG en lugar de QRCode
 
+interface FormData {
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  subcategoria: string;
+  detalles: string;
+  descripcionCorta: string;
+  precio: string;
+  descuento: string;
+  precioTotal: string;
+  productosRelacionados: string;
+  fotoUrl: string;
+  disponible: boolean;
+  destacado: boolean;
+  masVendido: boolean;
+  stock: number;
+  color: string;
+  fotosAdicionales: string[]; // Cambiado a un array de strings (URLs)
+}
+
+// Datos de ejemplo para categorías y subcategorías
+const categoriasYSubcategorias: { [key: string]: string[] } = {
+  repuestos: ["Motor", "Frenos", "Suspensión"],
+  accesorios: ["Cascos", "Guantes", "Chaquetas"],
+  lubricantes: ["Aceites", "Grasas", "Aditivos"],
+};
+
 const AgregarProducto = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     codigo: "",
     nombre: "",
     qr: "",
@@ -19,13 +46,63 @@ const AgregarProducto = () => {
     precio: "",
     descuento: "",
     precioTotal: "",
-    motosRelacionadas: "",
+    productosRelacionados: "",
     fotoUrl: "",
     disponible: true,
     destacado: false,
     masVendido: false,
     stock: 0,
+    color: "",
+    fotosAdicionales: [], // Ahora es un array de strings
   });
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [searchResults, setSearchResults] = useState<{ id: number; name: string }[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [subcategorias, setSubcategorias] = useState<string[]>([]);
+
+  // Actualizar subcategorías cuando cambia la categoría
+  useEffect(() => {
+    if (formData.categoria) {
+      setSubcategorias(categoriasYSubcategorias[formData.categoria as keyof typeof categoriasYSubcategorias] || []);
+      setFormData((prev) => ({ ...prev, subcategoria: "" })); // Resetear subcategoría
+    }
+  }, [formData.categoria]);
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.codigo) newErrors.codigo = "El código es obligatorio.";
+    if (!formData.nombre) newErrors.nombre = "El nombre es obligatorio.";
+    const precio = parseFloat(formData.precio);
+    const descuento = parseFloat(formData.descuento);
+    const stock = parseInt(formData.stock.toString());
+
+    if (!formData.precio || isNaN(precio) || precio <= 0)
+      newErrors.precio = "El precio debe ser un número positivo.";
+    if (formData.descuento && (isNaN(descuento) || descuento < 0 || descuento > 100))
+      newErrors.descuento = "El descuento debe ser un número entre 0 y 100.";
+    if (!formData.stock || isNaN(stock) || stock < 0)
+      newErrors.stock = "El stock debe ser un número positivo.";
+    if (formData.fotosAdicionales.length > 4)
+      newErrors.fotosAdicionales = "No se pueden agregar más de 4 fotos.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  useEffect(() => {
+    const precio = parseFloat(formData.precio);
+    const descuento = parseFloat(formData.descuento);
+
+    if (!isNaN(precio)) {
+      const total = isNaN(descuento) ? precio : precio - (precio * descuento / 100);
+      setFormData((prev) => ({
+        ...prev,
+        precioTotal: total.toFixed(2),
+      }));
+    }
+  }, [formData.precio, formData.descuento]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -52,10 +129,64 @@ const AgregarProducto = () => {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      if (files.length > 4) {
+        setErrors((prevErrors) => ({ ...prevErrors, fotosAdicionales: "No se pueden subir más de 4 fotos." }));
+      } else {
+        const urls = Array.from(files).map((file) => URL.createObjectURL(file));
+        setFormData({
+          ...formData,
+          fotosAdicionales: urls,
+        });
+        setErrors((prevErrors) => ({ ...prevErrors, fotosAdicionales: "" }));
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Formulario enviado:", formData);
-    // Aquí puedes agregar la lógica para enviar los datos al backend
+
+    if (validateForm()) {
+      console.log("Formulario enviado:", formData);
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === "fotosAdicionales") {
+          formData.fotosAdicionales.forEach((url, index) => {
+            formDataToSend.append(`fotoAdicional${index + 1}`, url);
+          });
+        } else {
+          formDataToSend.append(key, (formData as any)[key]);
+        }
+      });
+      console.log("Datos para enviar al backend:", formDataToSend);
+    } else {
+      console.log("Errores en el formulario:", errors);
+    }
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Simulación de búsqueda de motos o modelos relacionados
+    const results: { id: number; name: string }[] = [
+      { id: 1, name: "Moto A" },
+      { id: 2, name: "Moto B" },
+      { id: 3, name: "Modelo C" },
+    ].filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
+
+    setSearchResults(results);
+  };
+
+  const handleSelectResult = (result: { id: number; name: string }) => {
+    setSearchQuery(result.name);
+    setFormData({
+      ...formData,
+      productosRelacionados: result.name,
+    });
+    setSearchResults([]);
   };
 
   const generarCodigo = () => {
@@ -83,15 +214,16 @@ const AgregarProducto = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Agregar Producto</h1>
-      <p className="text-muted-foreground">
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl font-bold text-gray-800">Agregar Producto</h1>
+      <p className="text-muted-foreground text-gray-600">
         Aquí puedes agregar nuevos productos al inventario.
       </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6 bg-white p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="codigo">Código del Producto</Label>
+<<<<<<< HEAD
             <div className="flex space-x-2">
               <Input
                 id="codigo"
@@ -105,7 +237,20 @@ const AgregarProducto = () => {
                 Generar Código
               </Button>
             </div>
+=======
+            <Input
+              id="codigo"
+              name="codigo"
+              value={formData.codigo}
+              onChange={handleChange}
+              placeholder="Ingrese el código del producto"
+              required
+              className="mt-1"
+            />
+            {errors.codigo && <p className="text-red-500 text-sm mt-1">{errors.codigo}</p>}
+>>>>>>> 8be72d3a4089af4f80b3bb90329a412f8dc27537
           </div>
+
           <div>
             <Label htmlFor="nombre">Nombre del Producto</Label>
             <Input
@@ -115,8 +260,11 @@ const AgregarProducto = () => {
               onChange={handleChange}
               placeholder="Ingrese el nombre del producto"
               required
+              className="mt-1"
             />
+            {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
           </div>
+
           <div>
             <Label htmlFor="qr">Código QR</Label>
             <div className="flex items-center space-x-2">
@@ -149,8 +297,42 @@ const AgregarProducto = () => {
               value={formData.fotoUrl}
               onChange={handleChange}
               placeholder="Ingrese la URL de la foto del producto"
+              className="mt-1"
             />
           </div>
+
+          <div>
+            <Label htmlFor="color">Color</Label>
+            <Input
+              id="color"
+              name="color"
+              value={formData.color}
+              onChange={handleChange}
+              placeholder="Ingrese el color del producto"
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="fotosAdicionales">Fotos Adicionales (Máx. 4 URLs)</Label>
+            <Input
+              id="fotosAdicionales"
+              name="fotosAdicionales"
+              value={formData.fotosAdicionales.join(", ")}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  fotosAdicionales: e.target.value.split(", "),
+                })
+              }
+              placeholder="Ingrese las URLs de las fotos adicionales, separadas por comas"
+              className="mt-1"
+            />
+            {errors.fotosAdicionales && (
+              <p className="text-red-500 text-sm mt-1">{errors.fotosAdicionales}</p>
+            )}
+          </div>
+
           <div>
             <Label htmlFor="categoria">Categoría</Label>
             <Select
@@ -160,7 +342,7 @@ const AgregarProducto = () => {
                 setFormData({ ...formData, categoria: value })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Seleccione una categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -170,6 +352,7 @@ const AgregarProducto = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Label htmlFor="subcategoria">Subcategoría</Label>
             <Select
@@ -178,17 +361,21 @@ const AgregarProducto = () => {
               onValueChange={(value) =>
                 setFormData({ ...formData, subcategoria: value })
               }
+              disabled={!formData.categoria}
             >
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Seleccione una subcategoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="motor">Motor</SelectItem>
-                <SelectItem value="frenos">Frenos</SelectItem>
-                <SelectItem value="suspension">Suspensión</SelectItem>
+                {subcategorias.map((subcat) => (
+                  <SelectItem key={subcat} value={subcat}>
+                    {subcat}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Label htmlFor="detalles">Detalles</Label>
             <Textarea
@@ -197,8 +384,10 @@ const AgregarProducto = () => {
               value={formData.detalles}
               onChange={handleChange}
               placeholder="Ingrese los detalles del producto"
+              className="mt-1"
             />
           </div>
+
           <div>
             <Label htmlFor="descripcionCorta">Descripción Corta</Label>
             <Textarea
@@ -207,8 +396,10 @@ const AgregarProducto = () => {
               value={formData.descripcionCorta}
               onChange={handleChange}
               placeholder="Ingrese una descripción corta del producto"
+              className="mt-1"
             />
           </div>
+
           <div>
             <Label htmlFor="precio">Precio</Label>
             <Input
@@ -219,10 +410,13 @@ const AgregarProducto = () => {
               onChange={handleChange}
               placeholder="Ingrese el precio del producto"
               required
+              className="mt-1"
             />
+            {errors.precio && <p className="text-red-500 text-sm mt-1">{errors.precio}</p>}
           </div>
+
           <div>
-            <Label htmlFor="descuento">Descuento</Label>
+            <Label htmlFor="descuento">Descuento (%)</Label>
             <Input
               id="descuento"
               name="descuento"
@@ -230,8 +424,11 @@ const AgregarProducto = () => {
               value={formData.descuento}
               onChange={handleChange}
               placeholder="Ingrese el descuento"
+              className="mt-1"
             />
+            {errors.descuento && <p className="text-red-500 text-sm mt-1">{errors.descuento}</p>}
           </div>
+
           <div>
             <Label htmlFor="precioTotal">Precio Total</Label>
             <Input
@@ -240,20 +437,44 @@ const AgregarProducto = () => {
               type="number"
               value={formData.precioTotal}
               onChange={handleChange}
-              placeholder="Ingrese el precio total"
-              required
+              placeholder="Precio total calculado"
+              readOnly
+              className="mt-1"
             />
           </div>
+
           <div>
-            <Label htmlFor="motosRelacionadas">Motos Relacionadas</Label>
+            <Label htmlFor="productosRelacionados">Productos Relacionados</Label>
             <Input
-              id="motosRelacionadas"
-              name="motosRelacionadas"
-              value={formData.motosRelacionadas}
+              id="productosRelacionados"
+              name="productosRelacionados"
+              value={formData.productosRelacionados}
               onChange={handleChange}
-              placeholder="Ingrese las motos relacionadas"
+              placeholder="Ingrese los productos relacionados"
+              className="mt-1"
             />
+            <Input
+              type="text"
+              placeholder="Buscar moto o modelo..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="mt-2"
+            />
+            {searchResults.length > 0 && (
+              <ul className="mt-2 bg-white border border-gray-200 rounded-lg shadow-md">
+                {searchResults.map((result) => (
+                  <li
+                    key={result.id}
+                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSelectResult(result)}
+                  >
+                    {result.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
           <div>
             <Label htmlFor="stock">Stock del Producto</Label>
             <Input
@@ -264,8 +485,11 @@ const AgregarProducto = () => {
               onChange={handleChange}
               placeholder="Ingrese el stock disponible"
               required
+              className="mt-1"
             />
+            {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
           </div>
+
           <div>
             <Label htmlFor="disponible">Disponible</Label>
             <Switch
@@ -274,8 +498,10 @@ const AgregarProducto = () => {
               onCheckedChange={(checked) =>
                 handleSwitchChange("disponible", checked)
               }
+              className="mt-1"
             />
           </div>
+
           <div>
             <Label htmlFor="destacado">Destacado</Label>
             <Switch
@@ -284,8 +510,10 @@ const AgregarProducto = () => {
               onCheckedChange={(checked) =>
                 handleSwitchChange("destacado", checked)
               }
+              className="mt-1"
             />
           </div>
+
           <div>
             <Label htmlFor="masVendido">Lo más vendido</Label>
             <Switch
@@ -294,11 +522,15 @@ const AgregarProducto = () => {
               onCheckedChange={(checked) =>
                 handleSwitchChange("masVendido", checked)
               }
+              className="mt-1"
             />
           </div>
         </div>
+
         <div className="flex justify-end">
-          <Button type="submit">Agregar Producto</Button>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            Agregar Producto
+          </Button>
         </div>
       </form>
     </div>

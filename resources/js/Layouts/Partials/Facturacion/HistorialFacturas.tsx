@@ -134,7 +134,7 @@ const HistorialFacturas = () => {
             <div className="flex gap-2 relative">
               <button
                 onClick={toggleFiltersMenu}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gradient-to-r from-blue-800 to-blue-900 text-white hover:from-blue-900 hover:to-blue-950 transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
               >
                 <Filter size={20} />
                 <span className="hidden sm:inline">Filtros</span>

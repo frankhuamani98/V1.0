@@ -435,8 +435,8 @@ const FacturasPendientes = () => {
                         {factura.estado.charAt(0).toUpperCase() + factura.estado.slice(1)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                    <td className="px-0 py-0 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-0.5">
                         <button
                           onClick={() => handleEdit(factura)}
                           className="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-lg hover:bg-blue-100 transition-colors"

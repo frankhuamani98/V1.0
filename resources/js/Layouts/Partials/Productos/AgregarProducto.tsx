@@ -5,6 +5,10 @@ import { Button } from "@/Components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { Textarea } from "@/Components/ui/textarea";
 import { Switch } from "@/Components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/Components/ui/card";
+import { Badge } from "@/Components/ui/badge";
+import { Bike, DollarSign, ImagePlus, Tag, Truck, Star, Download } from "lucide-react";
+import * as XLSX from "xlsx"; // Importar la librería xlsx
 
 interface FormData {
   codigo: string;
@@ -16,22 +20,37 @@ interface FormData {
   precio: string;
   descuento: string;
   precioTotal: string;
-  productosRelacionados: string;
+  igv: string;
+  calificacion: number;
+  stock: number;
   fotoUrl: string;
   disponible: boolean;
   destacado: boolean;
   masVendido: boolean;
-  stock: number;
-  color: string;
-  fotosAdicionales: string[]; // Array de URLs
+  fotosAdicionales: string[];
+  compatibilidad: {
+    marca: string;
+    modelo: string;
+    año: string;
+  }[];
 }
 
-// Datos de ejemplo para categorías y subcategorías
 const categoriasYSubcategorias: { [key: string]: string[] } = {
-  repuestos: ["Motor", "Frenos", "Suspensión"],
-  accesorios: ["Cascos", "Guantes", "Chaquetas"],
-  lubricantes: ["Aceites", "Grasas", "Aditivos"],
+  repuestos: ["Frenos", "Suspensión", "Motor"],
+  accesorios: ["Luces", "Espejos", "Alforjas"],
+  mantenimiento: ["Aceites", "Filtros", "Líquidos"],
+  equipamiento: ["Cascos", "Chaquetas", "Guantes"]
 };
+
+const marcasMotos = ["Honda", "Yamaha", "Suzuki", "Kawasaki", "Ducati"];
+const modelosMotos: { [key: string]: string[] } = {
+  Honda: ["CBR600RR", "CRF250L", "Gold Wing"],
+  Yamaha: ["YZF-R1", "MT-07", "Tenere 700"],
+  Suzuki: ["GSX-R1000", "V-Strom 650", "Hayabusa"],
+  Kawasaki: ["Ninja 400", "Z900", "Versys 650"],
+  Ducati: ["Panigale V4", "Multistrada", "Monster"]
+};
+const añosMotos = ["2020", "2021", "2022", "2023"];
 
 const AgregarProducto = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -44,63 +63,60 @@ const AgregarProducto = () => {
     precio: "",
     descuento: "",
     precioTotal: "",
-    productosRelacionados: "",
+    igv: "18", // IGV por defecto en Perú
+    calificacion: 0,
+    stock: 0,
     fotoUrl: "",
     disponible: true,
     destacado: false,
     masVendido: false,
-    stock: 0,
-    color: "",
-    fotosAdicionales: [], // Array de URLs
+    fotosAdicionales: [],
+    compatibilidad: []
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [searchResults, setSearchResults] = useState<{ id: number; name: string }[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [subcategorias, setSubcategorias] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [newCompatibilidad, setNewCompatibilidad] = useState({
+    marca: "",
+    modelo: "",
+    año: ""
+  });
 
-  // Actualizar subcategorías cuando cambia la categoría
   useEffect(() => {
     if (formData.categoria) {
       setSubcategorias(categoriasYSubcategorias[formData.categoria] || []);
-      setFormData((prev) => ({ ...prev, subcategoria: "" })); // Resetear subcategoría
+      setFormData((prev) => ({ ...prev, subcategoria: "" }));
     }
   }, [formData.categoria]);
 
+  useEffect(() => {
+    const urls = [formData.fotoUrl, ...formData.fotosAdicionales].filter(Boolean);
+    setPreviewUrls(urls);
+  }, [formData.fotoUrl, formData.fotosAdicionales]);
+
+  useEffect(() => {
+    const precio = parseFloat(formData.precio) || 0;
+    const descuento = parseFloat(formData.descuento) || 0;
+    const igv = parseFloat(formData.igv) || 0;
+    const precioConDescuento = precio - (precio * descuento) / 100;
+    const precioTotal = precioConDescuento * (1 + igv / 100);
+    setFormData((prev) => ({
+      ...prev,
+      precioTotal: precioTotal.toFixed(2)
+    }));
+  }, [formData.precio, formData.descuento, formData.igv]);
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-
-    if (!formData.codigo) newErrors.codigo = "El código es obligatorio.";
-    if (!formData.nombre) newErrors.nombre = "El nombre es obligatorio.";
-    const precio = parseFloat(formData.precio);
-    const descuento = parseFloat(formData.descuento);
-    const stock = parseInt(formData.stock.toString());
-
-    if (!formData.precio || isNaN(precio) || precio <= 0)
-      newErrors.precio = "El precio debe ser un número positivo.";
-    if (formData.descuento && (isNaN(descuento) || descuento < 0 || descuento > 100))
-      newErrors.descuento = "El descuento debe ser un número entre 0 y 100.";
-    if (!formData.stock || isNaN(stock) || stock < 0)
-      newErrors.stock = "El stock debe ser un número positivo.";
-    if (formData.fotosAdicionales.length > 4)
-      newErrors.fotosAdicionales = "No se pueden agregar más de 4 fotos.";
-
+    if (!formData.codigo) newErrors.codigo = "El código es obligatorio";
+    if (!formData.nombre) newErrors.nombre = "El nombre es obligatorio";
+    if (!formData.categoria) newErrors.categoria = "La categoría es obligatoria";
+    if (!formData.precio) newErrors.precio = "El precio es obligatorio";
+    if (!formData.fotoUrl) newErrors.fotoUrl = "La imagen principal es obligatoria";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  useEffect(() => {
-    const precio = parseFloat(formData.precio);
-    const descuento = parseFloat(formData.descuento);
-
-    if (!isNaN(precio)) {
-      const total = isNaN(descuento) ? precio : precio - (precio * descuento / 100);
-      setFormData((prev) => ({
-        ...prev,
-        precioTotal: total.toFixed(2),
-      }));
-    }
-  }, [formData.precio, formData.descuento]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -121,7 +137,38 @@ const AgregarProducto = () => {
     const urls = e.target.value.split(",").map((url) => url.trim());
     setFormData({
       ...formData,
-      fotosAdicionales: urls,
+      fotosAdicionales: urls.filter(Boolean),
+    });
+  };
+
+  const handleCompatibilidadChange = (field: keyof typeof newCompatibilidad, value: string) => {
+    setNewCompatibilidad(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addCompatibilidad = () => {
+    if (newCompatibilidad.marca && newCompatibilidad.modelo && newCompatibilidad.año) {
+      setFormData(prev => ({
+        ...prev,
+        compatibilidad: [...prev.compatibilidad, { ...newCompatibilidad }]
+      }));
+      setNewCompatibilidad({ marca: "", modelo: "", año: "" });
+    }
+  };
+
+  const removeCompatibilidad = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      compatibilidad: prev.compatibilidad.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleCalificacionChange = (calificacion: number) => {
+    setFormData({
+      ...formData,
+      calificacion,
     });
   };
 
@@ -130,328 +177,386 @@ const AgregarProducto = () => {
 
     if (validateForm()) {
       console.log("Formulario enviado:", formData);
-      // Aquí puedes enviar los datos al backend
     } else {
       console.log("Errores en el formulario:", errors);
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+  // Función para exportar la lista de productos a Excel
+  const exportToExcel = () => {
+    // Crear una hoja de trabajo con los datos del formulario
+    const worksheet = XLSX.utils.json_to_sheet([formData]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Productos");
 
-    // Simulación de búsqueda de productos relacionados
-    const results: { id: number; name: string }[] = [
-      { id: 1, name: "Moto A" },
-      { id: 2, name: "Moto B" },
-      { id: 3, name: "Modelo C" },
-    ].filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
-
-    setSearchResults(results);
-  };
-
-  const handleSelectResult = (result: { id: number; name: string }) => {
-    setSearchQuery(result.name);
-    setFormData({
-      ...formData,
-      productosRelacionados: result.name,
-    });
-    setSearchResults([]);
+    // Generar el archivo Excel y descargarlo
+    XLSX.writeFile(workbook, "productos.xlsx");
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-gray-800">Agregar Producto</h1>
-      <p className="text-muted-foreground text-gray-600">
-        Aquí puedes agregar nuevos productos al inventario.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6 bg-white p-6 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Código del Producto */}
-          <div>
-            <Label htmlFor="codigo">Código del Producto</Label>
-            <Input
-              id="codigo"
-              name="codigo"
-              value={formData.codigo}
-              onChange={handleChange}
-              placeholder="Ingrese el código del producto"
-              required
-              className="mt-1"
-            />
-            {errors.codigo && <p className="text-red-500 text-sm mt-1">{errors.codigo}</p>}
-          </div>
+    <div className="max-h-[calc(100vh-100px)] overflow-y-auto">
+      <div className="max-w-7xl mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-8">Agregar Nuevo Producto</h1>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Información Básica */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Información Básica
+              </CardTitle>
+              <CardDescription>Detalles principales del producto</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="codigo">Código del Producto</Label>
+                <Input
+                  id="codigo"
+                  name="codigo"
+                  value={formData.codigo}
+                  onChange={handleChange}
+                  placeholder="Ingrese el código del producto"
+                />
+                {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nombre">Nombre del Producto</Label>
+                <Input
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  placeholder="Ingrese el nombre del producto"
+                />
+                {errors.nombre && <span className="text-red-500 text-sm">{errors.nombre}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="categoria">Categoría</Label>
+                <Select
+                  value={formData.categoria}
+                  onValueChange={(value) => setFormData({ ...formData, categoria: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(categoriasYSubcategorias).map((categoria) => (
+                      <SelectItem key={categoria} value={categoria}>
+                        {categoria}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.categoria && <span className="text-red-500 text-sm">{errors.categoria}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="subcategoria">Subcategoría</Label>
+                <Select
+                  value={formData.subcategoria}
+                  onValueChange={(value) => setFormData({ ...formData, subcategoria: value })}
+                  disabled={!formData.categoria}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione una subcategoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategorias.map((subcategoria) => (
+                      <SelectItem key={subcategoria} value={subcategoria}>
+                        {subcategoria}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.subcategoria && <span className="text-red-500 text-sm">{errors.subcategoria}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descripcionCorta">Descripción Corta</Label>
+                <Textarea
+                  id="descripcionCorta"
+                  name="descripcionCorta"
+                  value={formData.descripcionCorta}
+                  onChange={handleChange}
+                  placeholder="Ingrese una descripción corta del producto"
+                />
+                {errors.descripcionCorta && <span className="text-red-500 text-sm">{errors.descripcionCorta}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="detalles">Detalles del Producto</Label>
+                <Textarea
+                  id="detalles"
+                  name="detalles"
+                  value={formData.detalles}
+                  onChange={handleChange}
+                  placeholder="Ingrese los detalles del producto"
+                />
+                {errors.detalles && <span className="text-red-500 text-sm">{errors.detalles}</span>}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Nombre del Producto */}
-          <div>
-            <Label htmlFor="nombre">Nombre del Producto</Label>
-            <Input
-              id="nombre"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              placeholder="Ingrese el nombre del producto"
-              required
-              className="mt-1"
-            />
-            {errors.nombre && <p className="text-red-500 text-sm mt-1">{errors.nombre}</p>}
-          </div>
-
-          {/* URL de la Foto */}
-          <div>
-            <Label htmlFor="fotoUrl">URL de la Foto</Label>
-            <Input
-              id="fotoUrl"
-              name="fotoUrl"
-              value={formData.fotoUrl}
-              onChange={handleChange}
-              placeholder="Ingrese la URL de la foto del producto"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Color */}
-          <div>
-            <Label htmlFor="color">Color</Label>
-            <Input
-              id="color"
-              name="color"
-              value={formData.color}
-              onChange={handleChange}
-              placeholder="Ingrese el color del producto"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Fotos Adicionales */}
-          <div>
-            <Label htmlFor="fotosAdicionales">Fotos Adicionales (Máx. 4 URLs)</Label>
-            <Input
-              id="fotosAdicionales"
-              name="fotosAdicionales"
-              value={formData.fotosAdicionales.join(", ")}
-              onChange={handleFotosAdicionalesChange}
-              placeholder="Ingrese las URLs de las fotos adicionales, separadas por comas"
-              className="mt-1"
-            />
-            {errors.fotosAdicionales && (
-              <p className="text-red-500 text-sm mt-1">{errors.fotosAdicionales}</p>
-            )}
-          </div>
-
-          {/* Categoría */}
-          <div>
-            <Label htmlFor="categoria">Categoría</Label>
-            <Select
-              name="categoria"
-              value={formData.categoria}
-              onValueChange={(value) =>
-                setFormData({ ...formData, categoria: value })
-              }
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Seleccione una categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="repuestos">Repuestos</SelectItem>
-                <SelectItem value="accesorios">Accesorios</SelectItem>
-                <SelectItem value="lubricantes">Lubricantes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Subcategoría */}
-          <div>
-            <Label htmlFor="subcategoria">Subcategoría</Label>
-            <Select
-              name="subcategoria"
-              value={formData.subcategoria}
-              onValueChange={(value) =>
-                setFormData({ ...formData, subcategoria: value })
-              }
-              disabled={!formData.categoria}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Seleccione una subcategoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategorias.map((subcat) => (
-                  <SelectItem key={subcat} value={subcat}>
-                    {subcat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Detalles */}
-          <div>
-            <Label htmlFor="detalles">Detalles</Label>
-            <Textarea
-              id="detalles"
-              name="detalles"
-              value={formData.detalles}
-              onChange={handleChange}
-              placeholder="Ingrese los detalles del producto"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Descripción Corta */}
-          <div>
-            <Label htmlFor="descripcionCorta">Descripción Corta</Label>
-            <Textarea
-              id="descripcionCorta"
-              name="descripcionCorta"
-              value={formData.descripcionCorta}
-              onChange={handleChange}
-              placeholder="Ingrese una descripción corta del producto"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Precio */}
-          <div>
-            <Label htmlFor="precio">Precio</Label>
-            <Input
-              id="precio"
-              name="precio"
-              type="number"
-              value={formData.precio}
-              onChange={handleChange}
-              placeholder="Ingrese el precio del producto"
-              required
-              className="mt-1"
-            />
-            {errors.precio && <p className="text-red-500 text-sm mt-1">{errors.precio}</p>}
-          </div>
-
-          {/* Descuento */}
-          <div>
-            <Label htmlFor="descuento">Descuento (%)</Label>
-            <Input
-              id="descuento"
-              name="descuento"
-              type="number"
-              value={formData.descuento}
-              onChange={handleChange}
-              placeholder="Ingrese el descuento"
-              className="mt-1"
-            />
-            {errors.descuento && <p className="text-red-500 text-sm mt-1">{errors.descuento}</p>}
-          </div>
-
-          {/* Precio Total */}
-          <div>
-            <Label htmlFor="precioTotal">Precio Total</Label>
-            <Input
-              id="precioTotal"
-              name="precioTotal"
-              type="number"
-              value={formData.precioTotal}
-              onChange={handleChange}
-              placeholder="Precio total calculado"
-              readOnly
-              className="mt-1"
-            />
-          </div>
-
-          {/* Productos Relacionados */}
-          <div>
-            <Label htmlFor="productosRelacionados">Productos Relacionados</Label>
-            <Input
-              id="productosRelacionados"
-              name="productosRelacionados"
-              value={formData.productosRelacionados}
-              onChange={handleChange}
-              placeholder="Ingrese los productos relacionados"
-              className="mt-1"
-            />
-            <Input
-              type="text"
-              placeholder="Buscar moto o modelo..."
-              value={searchQuery}
-              onChange={handleSearch}
-              className="mt-2"
-            />
-            {searchResults.length > 0 && (
-              <ul className="mt-2 bg-white border border-gray-200 rounded-lg shadow-md">
-                {searchResults.map((result) => (
-                  <li
-                    key={result.id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSelectResult(result)}
+          {/* Compatibilidad con Motos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bike className="h-5 w-5" />
+                Compatibilidad con Motos
+              </CardTitle>
+              <CardDescription>Agregue las motos compatibles con este producto</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="marca">Marca</Label>
+                  <Select
+                    value={newCompatibilidad.marca}
+                    onValueChange={(value) => handleCompatibilidadChange("marca", value)}
                   >
-                    {result.name}
-                  </li>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione una marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marcasMotos.map((marca) => (
+                        <SelectItem key={marca} value={marca}>
+                          {marca}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="modelo">Modelo</Label>
+                  <Select
+                    value={newCompatibilidad.modelo}
+                    onValueChange={(value) => handleCompatibilidadChange("modelo", value)}
+                    disabled={!newCompatibilidad.marca}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un modelo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {newCompatibilidad.marca &&
+                        modelosMotos[newCompatibilidad.marca]?.map((modelo) => (
+                          <SelectItem key={modelo} value={modelo}>
+                            {modelo}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="año">Año</Label>
+                  <Select
+                    value={newCompatibilidad.año}
+                    onValueChange={(value) => handleCompatibilidadChange("año", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un año" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {añosMotos.map((año) => (
+                        <SelectItem key={año} value={año}>
+                          {año}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button type="button" onClick={addCompatibilidad}>
+                Agregar Compatibilidad
+              </Button>
+              <div className="space-y-4">
+                {formData.compatibilidad.map((compatibilidad, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <span>{`${compatibilidad.marca} ${compatibilidad.modelo} (${compatibilidad.año})`}</span>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeCompatibilidad(index)}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
                 ))}
-              </ul>
-            )}
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Stock del Producto */}
-          <div>
-            <Label htmlFor="stock">Stock del Producto</Label>
-            <Input
-              id="stock"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              placeholder="Ingrese el stock disponible"
-              required
-              className="mt-1"
-            />
-            {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
-          </div>
+          {/* Precio y Stock */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Precio y Stock
+              </CardTitle>
+              <CardDescription>Información de precio y disponibilidad</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="precio">Precio (S/.)</Label>
+                <Input
+                  id="precio"
+                  name="precio"
+                  value={formData.precio}
+                  onChange={handleChange}
+                  placeholder="Ingrese el precio"
+                />
+                {errors.precio && <span className="text-red-500 text-sm">{errors.precio}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descuento">Descuento (%)</Label>
+                <Input
+                  id="descuento"
+                  name="descuento"
+                  value={formData.descuento}
+                  onChange={handleChange}
+                  placeholder="Ingrese el descuento"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="igv">IGV (%)</Label>
+                <Input
+                  id="igv"
+                  name="igv"
+                  value={formData.igv}
+                  onChange={handleChange}
+                  placeholder="Ingrese el IGV"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="precioTotal">Precio Total (S/.)</Label>
+                <Input
+                  id="precioTotal"
+                  name="precioTotal"
+                  value={formData.precioTotal}
+                  readOnly
+                  placeholder="Precio total"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stock">Stock</Label>
+                <Input
+                  id="stock"
+                  name="stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  placeholder="Ingrese el stock"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="disponible">Disponible</Label>
+                <Switch
+                  id="disponible"
+                  checked={formData.disponible}
+                  onCheckedChange={(checked) => handleSwitchChange("disponible", checked)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="destacado">Destacado</Label>
+                <Switch
+                  id="destacado"
+                  checked={formData.destacado}
+                  onCheckedChange={(checked) => handleSwitchChange("destacado", checked)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="masVendido">Más Vendido</Label>
+                <Switch
+                  id="masVendido"
+                  checked={formData.masVendido}
+                  onCheckedChange={(checked) => handleSwitchChange("masVendido", checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Disponible */}
-          <div>
-            <Label htmlFor="disponible">Disponible</Label>
-            <Switch
-              id="disponible"
-              checked={formData.disponible}
-              onCheckedChange={(checked) =>
-                handleSwitchChange("disponible", checked)
-              }
-              className="mt-1"
-            />
-          </div>
+          {/* Calificación */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Calificación del Producto
+              </CardTitle>
+              <CardDescription>Asigne una calificación al producto</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Button
+                    key={star}
+                    type="button"
+                    variant={formData.calificacion >= star ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => handleCalificacionChange(star)}
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Destacado */}
-          <div>
-            <Label htmlFor="destacado">Destacado</Label>
-            <Switch
-              id="destacado"
-              checked={formData.destacado}
-              onCheckedChange={(checked) =>
-                handleSwitchChange("destacado", checked)
-              }
-              className="mt-1"
-            />
-          </div>
+          {/* Imágenes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImagePlus className="h-5 w-5" />
+                Imágenes del Producto
+              </CardTitle>
+              <CardDescription>Agregue imágenes del producto</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="fotoUrl">Imagen Principal</Label>
+                <Input
+                  id="fotoUrl"
+                  name="fotoUrl"
+                  value={formData.fotoUrl}
+                  onChange={handleChange}
+                  placeholder="Ingrese la URL de la imagen principal"
+                />
+                {errors.fotoUrl && <span className="text-red-500 text-sm">{errors.fotoUrl}</span>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fotosAdicionales">Imágenes Adicionales</Label>
+                <Input
+                  id="fotosAdicionales"
+                  name="fotosAdicionales"
+                  value={formData.fotosAdicionales.join(", ")}
+                  onChange={handleFotosAdicionalesChange}
+                  placeholder="Ingrese las URLs de las imágenes adicionales, separadas por comas"
+                />
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {previewUrls.map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-24 h-24 object-cover rounded"
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Lo más vendido */}
-          <div>
-            <Label htmlFor="masVendido">Lo más vendido</Label>
-            <Switch
-              id="masVendido"
-              checked={formData.masVendido}
-              onCheckedChange={(checked) =>
-                handleSwitchChange("masVendido", checked)
-              }
-              className="mt-1"
-            />
+          <div className="flex justify-end gap-4">
+            <Button variant="outline" type="button">
+              Cancelar
+            </Button>
+            <Button type="submit" className="bg-primary">
+              <Truck className="mr-2 h-4 w-4" />
+              Guardar Producto
+            </Button>
+            <Button type="button" onClick={exportToExcel} className="bg-green-500">
+              <Download className="mr-2 h-4 w-4" />
+              Exportar a Excel
+            </Button>
           </div>
-        </div>
-
-        {/* Botón de envío */}
-        <div className="flex justify-end">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-            Agregar Producto
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

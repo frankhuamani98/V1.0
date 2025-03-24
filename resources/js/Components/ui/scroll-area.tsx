@@ -1,4 +1,3 @@
-// components/ui/scroll-area.tsx
 import * as React from "react";
 
 interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {

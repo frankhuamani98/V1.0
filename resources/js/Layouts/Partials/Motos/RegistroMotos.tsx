@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/Components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Recycle as Motorcycle, BadgeCheck, AlertCircle, Calendar, Tag, Box } from 'lucide-react';

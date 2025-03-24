@@ -18,7 +18,7 @@ import {
 import { Button } from "@/Components/ui/button";
 import { ChevronDown, ChevronUp, Plus, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/Components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Toaster, toast } from "sonner";

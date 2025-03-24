@@ -25,7 +25,7 @@ import {
   DialogDescription,
 } from "@/Components/ui/dialog";
 import { Input } from "@/Components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 
 const ListaUsuarios = () => {

@@ -13,4 +13,10 @@ class Categoria extends Model
         'nombre',
         'estado',
     ];
+
+    // Relación con subcategorías
+    public function subcategorias()
+    {
+        return $this->hasMany(Subcategoria::class);
+    }
 }

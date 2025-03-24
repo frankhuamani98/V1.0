@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
 import { Button } from "@/Components/ui/button";

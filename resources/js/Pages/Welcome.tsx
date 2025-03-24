@@ -1,23 +1,30 @@
 import { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import Header from "./Home/Header";
 import MotorcycleSearch from "./Home/MotorcycleSearch";
+import Products from "./Home/Productos";
+
+interface WelcomeProps extends PageProps {
+    featuredProducts: any[];
+    bestSellingProducts: any[];
+    allProducts: any[];
+}
 
 export default function Welcome({
-  laravelVersion,
-  phpVersion,
-}: PageProps<{ laravelVersion: string; phpVersion: string }>) {
-  const { flash } = usePage().props as unknown as { flash: { error?: string } }; // Obtener los mensajes flash desde el backend
-
-  return (
-    <>
-
-
-      <Header />
-
-      <MotorcycleSearch />
-
-
-    </>
-  );
+    featuredProducts,
+    bestSellingProducts,
+    allProducts
+}: WelcomeProps) {
+    return (
+        <>
+            <Head title="Inicio" />
+            <Header />
+            <MotorcycleSearch />
+            <Products 
+                featuredProducts={featuredProducts}
+                bestSellingProducts={bestSellingProducts}
+                allProducts={allProducts}
+            />
+        </>
+    );
 }

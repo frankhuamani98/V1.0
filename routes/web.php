@@ -14,11 +14,10 @@ use App\Http\Controllers\Soporte\{ManualUsuarioController, SoporteTecnicoControl
 use App\Http\Controllers\Comentarios\{ListaComentariosController};
 use App\Http\Controllers\Banners\{SubirBannersController, HistorialBannersController};
 use App\Http\Controllers\Pedidos\{EstadoPedidosController, NuevosPedidosController, PedidosFinalizadosController, HistorialPedidosController};
+use App\Http\Controllers\WelcomeController;
 
 // Ruta principal
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-});
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
 // Rutas de autenticación
 Route::get('/register', function () {

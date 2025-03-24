@@ -18,7 +18,9 @@ import {
   ShieldCheckIcon,
   ClockIcon,
   ThumbsUpIcon,
-  ShoppingCartIcon
+  ShoppingCartIcon,
+  WrenchIcon,
+  PhoneIcon
 } from "lucide-react";
 
 // Datos
@@ -188,53 +190,93 @@ export default function MotorcycleSearch() {
 
   return (
     <div className="w-full">
-      {/* Hero Section - Más impactante */}
-      <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 py-16 text-center text-white relative overflow-hidden">
+      <div className="relative overflow-hidden">
+        {/* Fondo con gradiente mejorado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-600 to-indigo-900 opacity-90"></div>
+        
         {/* Patrón de fondo */}
         <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
-        }}></div>
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
+          }}></div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-md">
-            ¡TU TALLER DE CONFIANZA!
-          </h1>
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto font-medium">
-            Reparaciones y repuestos de calidad para tu moto.
-          </p>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto font-medium mt-2">
-            Más de 10 años brindando servicios de reparación y mantenimiento.
-          </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-6">
-            <Badge className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-sm border border-white/40">
-              <SparklesIcon className="h-4 w-4 mr-1" />
-              +3,000 Productos
-            </Badge>
-            <Badge className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 text-sm border border-white/40">
-              <ThumbsUpIcon className="h-4 w-4 mr-1" />
-              98% Satisfacción
-            </Badge>
-          </div>
-
-          {/* Countdown Timer */}
-          <div className="mt-6 bg-black/30 max-w-md mx-auto rounded-lg p-3 border border-white/20">
-            <p className="text-yellow-300 font-semibold text-sm mb-1">¡OFERTA FLASH HOY!</p>
-            <div className="flex justify-center gap-3">
-              <div className="bg-white/10 rounded px-3 py-1">
-                <span className="font-mono text-xl">{promoTime.hours}</span>
-                <span className="text-xs block">Horas</span>
-              </div>
-              <div className="bg-white/10 rounded px-3 py-1">
-                <span className="font-mono text-xl">{promoTime.minutes}</span>
-                <span className="text-xs block">Min</span>
-              </div>
-              <div className="bg-white/10 rounded px-3 py-1">
-                <span className="font-mono text-xl">{promoTime.seconds}</span>
-                <span className="text-xs block">Seg</span>
-              </div>
+        {/* Círculos decorativos */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        
+        {/* Contenido principal */}
+        <div className="relative z-10 container mx-auto px-4 py-16 md:py-15">
+          <div className="flex flex-col items-center">
+            {/* Distintivo de especialista */}
+            <div className="mb-6 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 text-white/90 text-sm font-medium tracking-wider animate-pulse">
+              ESPECIALISTAS EN MOTOS
             </div>
-            <p className="text-white/80 text-xs mt-1">Hasta 30%  en partes seleccionadas</p>
+            
+            {/* Título principal con efecto de entrada */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white text-center mb-4 tracking-tight">
+              <span className="inline-block animate-fade-in-up">¡TU TALLER DE</span> 
+              <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 animate-fade-in-up animation-delay-300"> CONFIANZA!</span>
+            </h1>
+            
+            {/* Subtítulos con mejor tipografía */}
+            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-medium text-center mb-3 animate-fade-in-up animation-delay-500">
+              Reparaciones y repuestos de calidad para tu moto.
+            </p>
+            <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto font-normal text-center mb-8 animate-fade-in-up animation-delay-700">
+              Más de 10 años brindando servicios de reparación y mantenimiento profesional.
+            </p>
+            
+            {/* Badges con mejor diseño */}
+            <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up animation-delay-900">
+              <Badge className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-4 py-2 text-sm border border-white/20 transition-all duration-300 flex items-center">
+                <SparklesIcon className="h-4 w-4 mr-2 text-yellow-300" />
+                <span>+5,000 Productos</span>
+              </Badge>
+              <Badge className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-4 py-2 text-sm border border-white/20 transition-all duration-300 flex items-center">
+                <ThumbsUpIcon className="h-4 w-4 mr-2 text-yellow-300" />
+                <span>98% Satisfacción</span>
+              </Badge>
+              <Badge className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-4 py-2 text-sm border border-white/20 transition-all duration-300 flex items-center">
+                <WrenchIcon className="h-4 w-4 mr-2 text-yellow-300" />
+                <span>Garantía Asegurada</span>
+              </Badge>
+            </div>
+            
+            {/* Botones de Call-to-Action */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8 animate-fade-in-up animation-delay-1000">
+              <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                AGENDAR SERVICIO
+              </Button>
+              <Button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/20 font-medium px-6 py-6 rounded-lg flex items-center transition-all duration-300">
+                <PhoneIcon className="h-5 w-5 mr-2" />
+                CONTACTAR AHORA
+              </Button>
+            </div>
+            
+            {/* Contador de tiempo mejorado */}
+            <div className="bg-black/30 backdrop-blur-md max-w-md w-full mx-auto rounded-xl p-4 border border-white/10 shadow-xl animate-fade-in-up animation-delay-1200">
+              <p className="text-yellow-300 font-bold text-base mb-2 flex justify-center items-center">
+                <SparklesIcon className="h-4 w-4 mr-2" />
+                ¡OFERTA FLASH HOY!
+                <SparklesIcon className="h-4 w-4 ml-2" />
+              </p>
+              <div className="flex justify-center gap-4">
+                <div className="bg-white/10 rounded-lg px-4 py-2 w-20 text-center">
+                  <span className="font-mono text-2xl font-bold text-white">{String(promoTime.hours).padStart(2, '0')}</span>
+                  <span className="text-xs text-white/70 block">HORAS</span>
+                </div>
+                <div className="bg-white/10 rounded-lg px-4 py-2 w-20 text-center">
+                  <span className="font-mono text-2xl font-bold text-white">{String(promoTime.minutes).padStart(2, '0')}</span>
+                  <span className="text-xs text-white/70 block">MINUTOS</span>
+                </div>
+                <div className="bg-white/10 rounded-lg px-4 py-2 w-20 text-center">
+                  <span className="font-mono text-2xl font-bold text-white">{String(promoTime.seconds).padStart(2, '0')}</span>
+                  <span className="text-xs text-white/70 block">SEGUNDOS</span>
+                </div>
+              </div>
+              <p className="text-center text-white/80 text-sm mt-3 font-medium">
+                Hasta <span className="text-yellow-300 font-bold">30% DESCUENTO</span> en partes seleccionadas
+              </p>
+            </div>
           </div>
         </div>
       </div>

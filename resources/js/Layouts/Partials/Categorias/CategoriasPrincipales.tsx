@@ -1,181 +1,147 @@
 import React, { useState } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import { PlusCircle, Edit, Trash, MoreVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import { router } from '@inertiajs/react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/Components/ui/dropdown-menu';
 
-interface Categoria {
-    id: number;
-    nombre: string;
-    estado: string;
-    created_at: string;
-    updated_at: string;
-}
+const CategoriasPrincipales = () => {
+  const [nombre, setNombre] = useState('');
+  const [estado, setEstado] = useState('Activo');
+  const [categorias, setCategorias] = useState([
+    { id: 1, nombre: 'Electrónica', estado: 'Activo' },
+    { id: 2, nombre: 'Ropa', estado: 'Activo' },
+    { id: 3, nombre: 'Hogar', estado: 'Inactivo' }
+  ]);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
 
-interface CategoriasPrincipalesProps {
-    categorias: Categoria[];
-}
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nombre.trim()) return;
 
-const CategoriasPrincipales = ({ categorias }: CategoriasPrincipalesProps) => {
-    const [nombre, setNombre] = useState('');
-    const [estado, setEstado] = useState('Activo');
-    const [error, setError] = useState('');
-    const [editandoCategoria, setEditandoCategoria] = useState<Categoria | null>(null);
+    if (editandoId) {
+      setCategorias(categorias.map(cat =>
+        cat.id === editandoId ? { ...cat, nombre, estado } : cat
+      ));
+      setEditandoId(null);
+    } else {
+      setCategorias([...categorias, {
+        id: Date.now(),
+        nombre,
+        estado
+      }]);
+    }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!nombre.trim()) {
-            setError('El nombre de la categoría es requerido');
-            return;
-        }
+    setNombre('');
+    setEstado('Activo');
+  };
 
-        if (editandoCategoria) {
-            // Si estamos editando, actualizamos la categoría
-            router.put(`/categorias/principales/${editandoCategoria.id}`, {
-                nombre,
-                estado,
-            }, {
-                onSuccess: () => {
-                    setNombre('');
-                    setEstado('Activo');
-                    setEditandoCategoria(null);
-                    setError('');
-                },
-                onError: (errors) => {
-                    setError(errors.nombre || 'Error al actualizar la categoría');
-                },
-            });
-        } else {
-            // Si no, creamos una nueva categoría
-            router.post('/categorias/principales', {
-                nombre,
-                estado,
-            }, {
-                onSuccess: () => {
-                    setNombre('');
-                    setEstado('Activo');
-                    setError('');
-                },
-                onError: (errors) => {
-                    setError(errors.nombre || 'Error al guardar la categoría');
-                },
-            });
-        }
-    };
+  const handleEliminar = (id: number) => {
+    setCategorias(categorias.filter(cat => cat.id !== id));
+  };
 
-    const handleEditar = (categoria: Categoria) => {
-        setNombre(categoria.nombre);
-        setEstado(categoria.estado);
-        setEditandoCategoria(categoria);
-    };
+  return (
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Categorías Principales</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2 text-gray-600">
+          Administra las categorías principales de tu sistema
+        </p>
+      </div>
 
-    const handleEliminar = (id: number) => {
-        if (confirm('¿Estás seguro de eliminar esta categoría?')) {
-            router.delete(`/categorias/principales/${id}`, {
-                onSuccess: () => {
-                    // Recargar la página o actualizar la lista de categorías
-                },
-            });
-        }
-    };
+      <Card className="shadow-sm border-gray-200">
+        <CardHeader className="pb-2 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl text-gray-800 font-medium">
+            {editandoId ? 'Editar Categoría' : 'Agregar Nueva Categoría'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <label className="text-xs sm:text-sm font-medium text-gray-700">Nombre de la categoría</label>
+              <Input
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Ej: Electrónica"
+                className="text-sm sm:text-base border-gray-300 focus:ring-1 sm:focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-    return (
-        <div className="p-6 space-y-6">
-            <h1 className="text-2xl font-bold">Categorías Principales</h1>
-            <p className="text-muted-foreground">
-                Aquí puedes gestionar las categorías principales.
-            </p>
+            <div className="space-y-1 sm:space-y-2">
+              <label className="text-xs sm:text-sm font-medium text-gray-700">Estado</label>
+              <Select value={estado} onValueChange={setEstado}>
+                <SelectTrigger className="text-sm sm:text-base border-gray-300 focus:ring-1 sm:focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="Selecciona un estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Activo" className="text-sm sm:text-base">Activo</SelectItem>
+                  <SelectItem value="Inactivo" className="text-sm sm:text-base">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="text-xl">
-                        {editandoCategoria ? 'Editar Categoría' : 'Agregar Nueva Categoría'}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="nombre">Nombre de la Categoría</Label>
-                            <Input
-                                id="nombre"
-                                value={nombre}
-                                onChange={(e) => setNombre(e.target.value)}
-                                placeholder="Ingrese el nombre de la categoría"
-                                className="w-full"
-                            />
-                            {error && <p className="text-sm text-destructive">{error}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="estado">Estado de la Categoría</Label>
-                            <Select value={estado} onValueChange={setEstado}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Seleccione un estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Activo">Activo</SelectItem>
-                                    <SelectItem value="Inactivo">Inactivo</SelectItem>
-                                    <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <Button type="submit" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            {editandoCategoria ? 'Actualizar Categoría' : 'Agregar Categoría'}
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium">
+              <Plus className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              {editandoId ? 'Actualizar Categoría' : 'Agregar Categoría'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-            {/* Listado de categorías existentes */}
-            <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="text-xl">Categorías Existentes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {categorias.map((categoria) => (
-                            <div key={categoria.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                                {/* Nombre de la categoría (izquierda) */}
-                                <p className="font-medium flex-1">{categoria.nombre}</p>
+      <Card className="shadow-sm border-gray-200">
+        <CardHeader className="pb-2 sm:pb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <CardTitle className="text-lg sm:text-xl text-gray-800 font-medium">Categorías Registradas</CardTitle>
+            <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {categorias.length} categorías
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-2 sm:space-y-3">
+          {categorias.map((categoria) => (
+            <div key={categoria.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg border-gray-200 hover:bg-gray-50 transition-colors gap-2 sm:gap-0">
+              <div className="flex-1">
+                <p className="font-medium text-gray-800 text-sm sm:text-base">{categoria.nombre}</p>
+              </div>
 
-                                {/* Estado (centrado) */}
-                                <div className="flex-1 flex justify-center">
-                                    <span className="text-sm text-muted-foreground bg-gray-100 px-2 py-1 rounded">
-                                        {categoria.estado}
-                                    </span>
-                                </div>
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
+                <span className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium ${
+                  categoria.estado === 'Activo'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {categoria.estado}
+                </span>
 
-                                {/* Menú desplegable para acciones (derecha) */}
-                                <div className="flex space-x-2">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-700">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => handleEditar(categoria)}>
-                                                <Edit className="mr-2 h-4 w-4" />
-                                                Editar
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleEliminar(categoria.id)} className="text-red-600">
-                                                <Trash className="mr-2 h-4 w-4" />
-                                                Eliminar
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
+                <div className="flex gap-1 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setNombre(categoria.nombre);
+                      setEstado(categoria.estado);
+                      setEditandoId(categoria.id);
+                    }}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-blue-600 hover:text-blue-800 border-gray-300 hover:bg-blue-50"
+                  >
+                    <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEliminar(categoria.id)}
+                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-red-600 hover:text-red-800 border-gray-300 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default CategoriasPrincipales;

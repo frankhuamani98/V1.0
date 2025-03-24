@@ -46,6 +46,8 @@ Route::prefix('usuarios')->group(function () {
 // Rutas de Productos
 Route::prefix('productos')->group(function () {
     Route::get('/agregar', [AgregarProductoController::class, 'index'])->name('productos.agregar');
+    Route::post('/agregar', [AgregarProductoController::class, 'store'])->name('productos.store');
+
     Route::get('/inventario', [InventarioProductosController::class, 'index'])->name('productos.inventario');
 });
 

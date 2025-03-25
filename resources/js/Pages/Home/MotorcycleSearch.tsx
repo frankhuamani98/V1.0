@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { Separator } from "@/Components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
@@ -23,44 +23,19 @@ import {
   PhoneIcon
 } from "lucide-react";
 
-// Datos
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
-const brands = [
-  { value: "honda", label: "Honda", popular: true },
-  { value: "yamaha", label: "Yamaha", popular: true },
-  { value: "suzuki", label: "Suzuki", popular: true },
-  { value: "kawasaki", label: "Kawasaki", popular: true },
-  { value: "bmw", label: "BMW", popular: false },
-  { value: "ducati", label: "Ducati", popular: false },
-  { value: "ktm", label: "KTM", popular: false },
-  { value: "aprilia", label: "Aprilia", popular: false },
-  { value: "triumph", label: "Triumph", popular: false },
-  { value: "harley", label: "Harley-Davidson", popular: true },
-  { value: "indian", label: "Indian", popular: false },
-  { value: "royal-enfield", label: "Royal Enfield", popular: false }
-];
+// Tipos para los datos de motos
+interface MotoData {
+    years: number[];
+    brands: string[];
+    models: Array<{
+        modelo: string;
+        marca: string;
+    }>;
+}
 
-const models = [
-  { value: "cbr600rr", label: "CBR 600RR", brand: "honda", type: "deportiva", featured: true },
-  { value: "cb500f", label: "CB 500F", brand: "honda", type: "naked" },
-  { value: "africa-twin", label: "Africa Twin", brand: "honda", type: "adventure", featured: true },
-  { value: "r1", label: "YZF-R1", brand: "yamaha", type: "deportiva", featured: true },
-  { value: "mt-09", label: "MT-09", brand: "yamaha", type: "naked", featured: true },
-  { value: "tenere-700", label: "Ténéré 700", brand: "yamaha", type: "adventure" },
-  { value: "gsxr750", label: "GSX-R750", brand: "suzuki", type: "deportiva" },
-  { value: "sv650", label: "SV650", brand: "suzuki", type: "naked" },
-  { value: "v-strom-650", label: "V-Strom 650", brand: "suzuki", type: "adventure" },
-  { value: "zx10r", label: "Ninja ZX-10R", brand: "kawasaki", type: "deportiva", featured: true },
-  { value: "z900", label: "Z900", brand: "kawasaki", type: "naked" },
-  { value: "versys-650", label: "Versys 650", brand: "kawasaki", type: "adventure" },
-  { value: "s1000rr", label: "S 1000 RR", brand: "bmw", type: "deportiva", featured: true },
-  { value: "r1250gs", label: "R 1250 GS", brand: "bmw", type: "adventure", featured: true },
-  { value: "panigalev4", label: "Panigale V4", brand: "ducati", type: "deportiva", featured: true },
-  { value: "monster", label: "Monster", brand: "ducati", type: "naked" },
-  { value: "sportster", label: "Sportster", brand: "harley", type: "cruiser", featured: true },
-  { value: "street-glide", label: "Street Glide", brand: "harley", type: "touring" }
-];
+interface Props {
+    motoData: MotoData;
+}
 
 const categories = [
   { name: "Frenos", icon: <ZapIcon className="h-4 w-4" />, count: 428 },
@@ -69,11 +44,11 @@ const categories = [
   { name: "....", icon: <ThumbsUpIcon className="h-4 w-4" />, count: 198 }
 ];
 
-export default function MotorcycleSearch() {
+export default function MotorcycleSearch({ motoData }: Props) {
   const [year, setYear] = useState<string>("");
   const [brand, setBrand] = useState<string>("");
   const [model, setModel] = useState<string>("");
-  const [filteredModels, setFilteredModels] = useState(models);
+  const [filteredModels, setFilteredModels] = useState<Array<{modelo: string, marca: string}>>([]);
   const [searchMode, setSearchMode] = useState<"standard" | "advanced">("standard");
   const [recentSearches, setRecentSearches] = useState<Array<{year: string, brand: string, model: string}>>([]);
   const [loading, setLoading] = useState(false);
@@ -128,18 +103,17 @@ export default function MotorcycleSearch() {
   const handleBrandChange = (value: string) => {
     setBrand(value);
     setModel("");
-    setFilteredModels(models.filter(m => m.brand === value));
+    setFilteredModels(motoData.models.filter(m => m.marca === value));
   };
 
   const saveSearch = () => {
     // Solo guardar búsquedas completas
     if (year && brand && model) {
-      const brandName = brands.find(b => b.value === brand)?.label || "";
-      const modelName = models.find(m => m.value === model)?.label || "";
+      const modelName = motoData.models.find(m => m.modelo === model)?.modelo || "";
 
-      const newSearch = { year, brand: brandName, model: modelName };
+      const newSearch = { year, brand, model: modelName };
       const updatedSearches = [newSearch, ...recentSearches.filter(
-        s => !(s.year === year && s.brand === brandName && s.model === modelName)
+        s => !(s.year === year && s.brand === brand && s.model === modelName)
       )].slice(0, 3);
 
       setRecentSearches(updatedSearches);
@@ -161,7 +135,7 @@ export default function MotorcycleSearch() {
     saveSearch();
 
     toast.success("¡En camino a toda velocidad!", {
-      description: `Buscando las mejores partes para tu ${brands.find(b => b.value === brand)?.label} ${models.find(m => m.value === model)?.label} ${year}`
+      description: `Buscando las mejores partes para tu ${brand} ${model} ${year}`
     });
 
     // Simulación de carga antes de redirigir
@@ -171,9 +145,6 @@ export default function MotorcycleSearch() {
   };
 
   const handleQuickSearch = (search: {year: string, brand: string, model: string}) => {
-    const brandValue = brands.find(b => b.label === search.brand)?.value || "";
-    const modelValue = models.find(m => m.label === search.model)?.value || "";
-
     setLoading(true);
     toast.success("¡Búsqueda instantánea!", {
       description: `Localizando piezas premium para tu ${search.brand} ${search.model} ${search.year}`
@@ -182,8 +153,8 @@ export default function MotorcycleSearch() {
     setTimeout(() => {
       window.location.href = route("resultado", {
         year: search.year,
-        brand: brandValue,
-        model: modelValue
+        brand: search.brand,
+        model: search.model
       });
     }, 800);
   };
@@ -351,8 +322,8 @@ export default function MotorcycleSearch() {
                           <SelectValue placeholder="Selecciona Año" />
                         </SelectTrigger>
                         <SelectContent className="max-h-60">
-                          {years.map(y => (
-                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                          {motoData.years.map((y, index) => (
+                            <SelectItem key={index} value={y.toString()}>{y}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -369,17 +340,8 @@ export default function MotorcycleSearch() {
                           <SelectValue placeholder="Selecciona Marca" />
                         </SelectTrigger>
                         <SelectContent className="max-h-60">
-                          <div className="p-2 border-b">
-                            <span className="text-xs font-medium text-muted-foreground">Marcas Populares</span>
-                          </div>
-                          {brands.filter(b => b.popular).map(b => (
-                            <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
-                          ))}
-                          <div className="p-2 border-b mt-2">
-                            <span className="text-xs font-medium text-muted-foreground">Otras Marcas</span>
-                          </div>
-                          {brands.filter(b => !b.popular).map(b => (
-                            <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                          {motoData.brands.map((b, index) => (
+                            <SelectItem key={index} value={b}>{b}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -396,8 +358,8 @@ export default function MotorcycleSearch() {
                           <SelectValue placeholder={brand ? "Selecciona Modelo" : "Primero selecciona una marca"} />
                         </SelectTrigger>
                         <SelectContent className="max-h-60">
-                          {filteredModels.map(m => (
-                            <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                          {filteredModels.map((m, index) => (
+                            <SelectItem key={index} value={m.modelo}>{m.modelo}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

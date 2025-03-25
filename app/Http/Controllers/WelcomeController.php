@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Moto;
 use App\Models\Producto;
 use Inertia\Inertia;
 
@@ -9,6 +10,11 @@ class WelcomeController extends Controller
 {
     public function index()
     {
+        // Obtener marcas y modelos desde la base de datos
+        $marcas = Moto::select('marca')->distinct()->get()->pluck('marca');
+        $modelos = Moto::select('modelo', 'marca')->get();
+        $years = Moto::select('año')->distinct()->orderBy('año', 'desc')->get()->pluck('año');
+
         // Obtener productos destacados (activos) con relaciones
         $featuredProducts = Producto::where('destacado', true)
             ->where('estado', 'Activo')
@@ -20,8 +26,8 @@ class WelcomeController extends Controller
                     'id' => $product->id,
                     'nombre' => $product->nombre,
                     'descripcion_corta' => $product->descripcion_corta,
-                    'precio' => (float)$product->precio, // Aseguramos tipo float
-                    'descuento' => (float)$product->descuento, // Aseguramos tipo float
+                    'precio' => (float)$product->precio,
+                    'descuento' => (float)$product->descuento,
                     'imagen_principal' => $product->imagen_principal,
                     'calificacion' => (float)$product->calificacion,
                     'destacado' => (bool)$product->destacado,
@@ -93,7 +99,11 @@ class WelcomeController extends Controller
             'featuredProducts' => $featuredProducts,
             'bestSellingProducts' => $bestSellingProducts,
             'allProducts' => $allProducts,
-            // Mantenemos cualquier otra variable que ya tengas
+            'motoData' => [
+                'years' => $years,
+                'brands' => $marcas,
+                'models' => $modelos
+            ],
             'laravelVersion' => app()->version(),
             'phpVersion' => phpversion(),
         ]);

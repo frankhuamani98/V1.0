@@ -15,9 +15,13 @@ use App\Http\Controllers\Comentarios\{ListaComentariosController};
 use App\Http\Controllers\Banners\{SubirBannersController, HistorialBannersController};
 use App\Http\Controllers\Pedidos\{EstadoPedidosController, NuevosPedidosController, PedidosFinalizadosController, HistorialPedidosController};
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ResultadosController;
+use App\Http\Controllers\ProductoController;
 
-// Ruta principal
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+Route::get('/resultados', [ResultadosController::class, 'index'])->name('resultados');
+
+
 
 // Rutas de autenticación
 Route::get('/register', function () {

@@ -138,9 +138,13 @@ export default function MotorcycleSearch({ motoData }: Props) {
       description: `Buscando las mejores partes para tu ${brand} ${model} ${year}`
     });
 
-    // Simulación de carga antes de redirigir
+    // Redirección mejorada con parámetros codificados
     setTimeout(() => {
-      window.location.href = route("resultado", { year, brand, model });
+      const params = new URLSearchParams();
+      params.append('year', year);
+      params.append('brand', brand);
+      params.append('model', model);
+      window.location.href = `/resultados?${params.toString()}`;
     }, 800);
   };
 
@@ -151,44 +155,37 @@ export default function MotorcycleSearch({ motoData }: Props) {
     });
 
     setTimeout(() => {
-      window.location.href = route("resultado", {
-        year: search.year,
-        brand: search.brand,
-        model: search.model
-      });
+      const params = new URLSearchParams();
+      params.append('year', search.year);
+      params.append('brand', search.brand);
+      params.append('model', search.model);
+      window.location.href = `/resultados?${params.toString()}`;
     }, 800);
   };
 
   return (
     <div className="w-full">
       <div className="relative overflow-hidden">
-        {/* Fondo con gradiente mejorado */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-600 to-indigo-900 opacity-90"></div>
         
-        {/* Patrón de fondo */}
         <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
           }}></div>
 
-        {/* Círculos decorativos */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         
-        {/* Contenido principal */}
         <div className="relative z-10 container mx-auto px-4 py-16 md:py-15">
           <div className="flex flex-col items-center">
-            {/* Distintivo de especialista */}
             <div className="mb-6 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 text-white/90 text-sm font-medium tracking-wider animate-pulse">
               ESPECIALISTAS EN MOTOS
             </div>
             
-            {/* Título principal con efecto de entrada */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white text-center mb-4 tracking-tight">
               <span className="inline-block animate-fade-in-up">¡TU TALLER DE</span> 
               <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 animate-fade-in-up animation-delay-300"> CONFIANZA!</span>
             </h1>
             
-            {/* Subtítulos con mejor tipografía */}
             <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-medium text-center mb-3 animate-fade-in-up animation-delay-500">
               Reparaciones y repuestos de calidad para tu moto.
             </p>
@@ -196,7 +193,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
               Más de 10 años brindando servicios de reparación y mantenimiento profesional.
             </p>
             
-            {/* Badges con mejor diseño */}
             <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up animation-delay-900">
               <Badge className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-4 py-2 text-sm border border-white/20 transition-all duration-300 flex items-center">
                 <SparklesIcon className="h-4 w-4 mr-2 text-yellow-300" />
@@ -212,7 +208,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
               </Badge>
             </div>
             
-            {/* Botones de Call-to-Action */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8 animate-fade-in-up animation-delay-1000">
               <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
                 AGENDAR SERVICIO
@@ -223,7 +218,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
               </Button>
             </div>
             
-            {/* Contador de tiempo mejorado */}
             <div className="bg-black/30 backdrop-blur-md max-w-md w-full mx-auto rounded-xl p-4 border border-white/10 shadow-xl animate-fade-in-up animation-delay-1200">
               <p className="text-yellow-300 font-bold text-base mb-2 flex justify-center items-center">
                 <SparklesIcon className="h-4 w-4 mr-2" />
@@ -252,9 +246,7 @@ export default function MotorcycleSearch({ motoData }: Props) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Promo Banner - Solo se muestra si showPromo es true */}
         {showPromo && (
           <Card className="border-2 border-yellow-400 mb-6 overflow-hidden bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30">
             <CardContent className="p-4 flex items-center justify-between">
@@ -279,7 +271,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
           </Card>
         )}
 
-        {/* Search Card - Más llamativa */}
         <Card className="border-none rounded-xl shadow-xl overflow-hidden relative -mt-10 z-10 bg-white dark:bg-gray-900">
           <CardContent className="p-0">
             <Tabs defaultValue="standard" className="w-full">
@@ -311,7 +302,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
 
                 <form onSubmit={handleSearch} className="w-full max-w-3xl mx-auto">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Year Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="year" className="font-medium text-sm flex items-center">
                         <ClockIcon className="h-4 w-4 mr-1 text-blue-500" />
@@ -329,7 +319,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
                       </Select>
                     </div>
 
-                    {/* Brand Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="brand" className="font-medium text-sm flex items-center">
                         <StarIcon className="h-4 w-4 mr-1 text-blue-500" />
@@ -347,7 +336,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
                       </Select>
                     </div>
 
-                    {/* Model Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="model" className="font-medium text-sm flex items-center">
                         <BikeIcon className="h-4 w-4 mr-1 text-blue-500" />
@@ -366,7 +354,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
                     </div>
                   </div>
 
-                  {/* Search Button - Más atractivo */}
                   <div className="text-center mt-8">
                     <Button
                       type="submit"
@@ -388,7 +375,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
                   </div>
                 </form>
 
-                {/* Recent Searches - Más visual */}
                 {recentSearches.length > 0 && (
                   <div className="mt-10">
                     <div className="flex items-center justify-center mb-4">
@@ -429,7 +415,6 @@ export default function MotorcycleSearch({ motoData }: Props) {
                   </p>
                 </div>
 
-                {/* Categorías populares */}
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold mb-4">Categorías populares</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -32,6 +32,7 @@
     --custom-blue: #253456;
     --custom-footer: #10192e;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -58,25 +59,19 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
+    scrollbar-width: none; /* Para Firefox */
   }
+
   body {
     @apply bg-background text-foreground;
+    -ms-overflow-style: none; /* Para Internet Explorer */
   }
 }
 
+/* Ocultar la barra de desplazamiento en navegadores WebKit */
 ::-webkit-scrollbar {
   display: none;
-}
-
-* {
-  scrollbar-width: none;
-}
-
-body {
-  -ms-overflow-style: none;
 }

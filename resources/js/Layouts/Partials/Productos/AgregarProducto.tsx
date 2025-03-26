@@ -56,6 +56,38 @@ const coloresPrimarios: ColorOption[] = [
     { id: 'turquesa', nombre: 'Turquesa', hex: '#40E0D0' }
 ];
 
+// Funciones de ayuda para formato de moneda
+const formatCurrencyInput = (value: string): string => {
+  if (!value) return '';
+  
+  // Eliminar todos los caracteres no numéricos excepto el punto decimal
+  const numericValue = value.replace(/[^0-9.]/g, '');
+  
+  // Dividir en parte entera y decimal
+  const parts = numericValue.split('.');
+  let integerPart = parts[0] || '0';
+  const decimalPart = parts.length > 1 ? `.${parts[1].substring(0, 2)}` : '';
+  
+  // Formatear la parte entera con separadores de miles
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  // Combinar las partes
+  return `${integerPart}${decimalPart}`;
+};
+
+const parseCurrencyInput = (value: string): string => {
+  return value.replace(/,/g, '');
+};
+
+const formatCurrencyDisplay = (value: number): string => {
+  return new Intl.NumberFormat('es-PE', {
+    style: 'currency',
+    currency: 'PEN',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+};
+
 const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         codigo: "",
@@ -88,7 +120,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
 
     // Calcular precios
     const { precioSinIGV, precioConIGV, precioTotal } = useMemo(() => {
-        const precioBase = parseFloat(data.precio) || 0;
+        const precioBase = parseFloat(parseCurrencyInput(data.precio)) || 0;
         const descuento = parseFloat(data.descuento) || 0;
         const IGV_PERCENT = 18;
 
@@ -99,7 +131,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
             precioConDescuento = 0;
         }
 
-        let precioFinal = precioConDescuento;
         if (data.incluye_igv) {
             const precioSinIGV = precioConDescuento / (1 + IGV_PERCENT / 100);
             return {
@@ -132,6 +163,13 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
         const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
         
         setData(name as keyof typeof data, type === 'checkbox' ? (checked ?? false) as false : value as string | number);
+    };
+
+    const handlePrecioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = e.target.value
+            .replace(/[^0-9.]/g, '')
+            .replace(/(\..*)\./g, '$1'); // Evitar múltiples puntos
+        setData('precio', rawValue);
     };
 
     const agregarImagenAdicional = () => {
@@ -188,6 +226,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
         
         router.post(route('productos.store'), {
             ...data,
+            precio: parseCurrencyInput(data.precio),
             imagenes_adicionales: data.imagenes_adicionales,
             colores: data.colores,
             coloresPersonalizados: data.coloresPersonalizados,
@@ -402,13 +441,14 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                                 <Input
                                     id="precio"
                                     name="precio"
-                                    type="number"
-                                    value={data.precio}
-                                    onChange={handleInputChange}
+                                    value={formatCurrencyInput(data.precio)}
+                                    onChange={handlePrecioChange}
+                                    onBlur={(e) => {
+                                        const value = parseFloat(parseCurrencyInput(e.target.value)) || 0;
+                                        setData('precio', value.toString());
+                                    }}
                                     placeholder="0.00"
                                     className="pl-10"
-                                    min="0"
-                                    step="0.01"
                                     required
                                 />
                             </div>
@@ -523,15 +563,15 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                     <div className="space-y-2 border p-4 rounded-md bg-gray-50 dark:bg-gray-800">
                         <div className="flex justify-between">
                             <span className="text-gray-600">Precio sin IGV:</span>
-                            <span className="font-medium">S/. {precioSinIGV.toFixed(2)}</span>
+                            <span className="font-medium">{formatCurrencyDisplay(precioSinIGV)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">IGV (18%):</span>
-                            <span className="font-medium">S/. {(precioConIGV - precioSinIGV).toFixed(2)}</span>
+                            <span className="font-medium">{formatCurrencyDisplay(precioConIGV - precioSinIGV)}</span>
                         </div>
                         <div className="flex justify-between border-t pt-2 mt-2">
                             <span className="text-gray-600 font-semibold">Precio Total:</span>
-                            <span className="font-bold">S/. {precioTotal.toFixed(2)}</span>
+                            <span className="font-bold">{formatCurrencyDisplay(precioTotal)}</span>
                         </div>
                         {data.descuento > "0" && (
                             <div className="text-sm text-green-600 mt-1">

@@ -1,194 +1,297 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Label } from '@/Components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card';
+import { 
+  PlusCircle, 
+  Edit, 
+  Trash, 
+  Check, 
+  X, 
+  Search, 
+  Filter, 
+  Loader2, 
+  RefreshCw,
+  ChevronUp,
+  ChevronDown,
+  Folder,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  MoreVertical
+} from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
+import { router } from '@inertiajs/react';
+import { 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent, 
+  DropdownMenuItem,
+  DropdownMenuSeparator 
+} from '@/Components/ui/dropdown-menu';
+import { Badge } from '@/Components/ui/badge';
+import { motion } from 'framer-motion';
 
-const Subcategorias = () => {
-  const [nombre, setNombre] = useState('');
-  const [categoriaId, setCategoriaId] = useState('');
-  const [estado, setEstado] = useState('Activo');
-  const [subcategorias, setSubcategorias] = useState([
-    {
-      id: 1,
-      nombre: 'Smartphones',
-      categoria: 'Electrónica',
-      estado: 'Activo'
-    },
-    {
-      id: 2,
-      nombre: 'Laptops',
-      categoria: 'Electrónica',
-      estado: 'Activo'
-    }
-  ]);
-  const [editandoId, setEditandoId] = useState<number | null>(null);
+interface Subcategoria {
+    id: number;
+    nombre: string;
+    categoria_id: number;
+    categoria: {
+        nombre: string;
+    };
+    estado: string;
+    created_at: string;
+}
 
-  const categorias = [
-    { id: '1', nombre: 'Electrónica' },
-    { id: '2', nombre: 'Ropa' },
-    { id: '3', nombre: 'Hogar' }
-  ];
+interface Categoria {
+    id: number;
+    nombre: string;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nombre.trim() || !categoriaId) return;
+interface SubcategoriasProps {
+    subcategorias: Subcategoria[];
+    categorias: Categoria[];
+}
 
-    const categoriaSeleccionada = categorias.find(c => c.id === categoriaId)?.nombre || '';
+const Subcategorias = ({ subcategorias: initialSubcategorias, categorias }: SubcategoriasProps) => {
+    const [nombre, setNombre] = useState('');
+    const [categoriaId, setCategoriaId] = useState('');
+    const [estado, setEstado] = useState('Activo');
+    const [error, setError] = useState('');
+    const [editandoId, setEditandoId] = useState<number | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [subcategorias, setSubcategorias] = useState<Subcategoria[]>(initialSubcategorias);
 
-    if (editandoId) {
-      setSubcategorias(subcategorias.map(sub =>
-        sub.id === editandoId ? {
-          ...sub,
-          nombre,
-          categoria: categoriaSeleccionada,
-          estado
-        } : sub
-      ));
-      setEditandoId(null);
-    } else {
-      setSubcategorias([...subcategorias, {
-        id: Date.now(),
-        nombre,
-        categoria: categoriaSeleccionada,
-        estado
-      }]);
-    }
+    useEffect(() => {
+        setSubcategorias(initialSubcategorias);
+    }, [initialSubcategorias]);
 
-    setNombre('');
-    setCategoriaId('');
-    setEstado('Activo');
-  };
+    const showSuccessNotification = (message: string) => {
+        setSuccessMessage(message);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+    };
 
-  const handleEliminar = (id: number) => {
-    setSubcategorias(subcategorias.filter(sub => sub.id !== id));
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!nombre.trim()) {
+            setError('El nombre es requerido');
+            return;
+        }
+        
+        if (!categoriaId) {
+            setError('Seleccione una categoría');
+            return;
+        }
 
-  return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
-      <div className="text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Subcategorías</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2 text-gray-600">
-          Administra las subcategorías de tu sistema
-        </p>
-      </div>
+        setIsSubmitting(true);
 
-      <Card className="shadow-sm border-gray-200">
-        <CardHeader className="pb-2 sm:pb-4">
-          <CardTitle className="text-lg sm:text-xl text-gray-800 font-medium">
-            {editandoId ? 'Editar Subcategoría' : 'Agregar Nueva Subcategoría'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <div className="space-y-1 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-gray-700">Nombre de la subcategoría</label>
-              <Input
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: Smartphones"
-                className="text-sm sm:text-base border-gray-300 focus:ring-1 sm:focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+        if (editandoId) {
+            router.put(`/categorias/subcategorias/${editandoId}`, {
+                nombre,
+                categoria_id: categoriaId,
+                estado
+            }, {
+                onSuccess: () => {
+                    resetForm();
+                    showSuccessNotification('Subcategoría actualizada!');
+                    router.reload({ only: ['subcategorias'] });
+                },
+                onError: (errors) => {
+                    setError(errors.message || 'Error al actualizar');
+                    setIsSubmitting(false);
+                }
+            });
+        } else {
+            router.post('/categorias/subcategorias', {
+                nombre,
+                categoria_id: categoriaId,
+                estado
+            }, {
+                onSuccess: () => {
+                    resetForm();
+                    showSuccessNotification('Subcategoría creada!');
+                    router.reload({ only: ['subcategorias'] });
+                },
+                onError: (errors) => {
+                    setError(errors.message || 'Error al crear');
+                    setIsSubmitting(false);
+                }
+            });
+        }
+    };
 
-            <div className="space-y-1 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-gray-700">Categoría principal</label>
-              <Select value={categoriaId} onValueChange={setCategoriaId}>
-                <SelectTrigger className="text-sm sm:text-base border-gray-300 focus:ring-1 sm:focus:ring-2 focus:ring-blue-500">
-                  <SelectValue placeholder="Selecciona una categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categorias.map((categoria) => (
-                    <SelectItem key={categoria.id} value={categoria.id} className="text-sm sm:text-base">
-                      {categoria.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    const resetForm = () => {
+        setNombre('');
+        setCategoriaId('');
+        setEstado('Activo');
+        setError('');
+        setEditandoId(null);
+        setIsSubmitting(false);
+    };
 
-            <div className="space-y-1 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-gray-700">Estado</label>
-              <Select value={estado} onValueChange={setEstado}>
-                <SelectTrigger className="text-sm sm:text-base border-gray-300 focus:ring-1 sm:focus:ring-2 focus:ring-blue-500">
-                  <SelectValue placeholder="Selecciona un estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Activo" className="text-sm sm:text-base">Activo</SelectItem>
-                  <SelectItem value="Inactivo" className="text-sm sm:text-base">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    const handleEditar = (subcategoria: Subcategoria) => {
+        setNombre(subcategoria.nombre);
+        setCategoriaId(subcategoria.categoria_id.toString());
+        setEstado(subcategoria.estado);
+        setEditandoId(subcategoria.id);
+    };
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-medium">
-              <Plus className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              {editandoId ? 'Actualizar Subcategoría' : 'Agregar Subcategoría'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    const handleEliminar = (id: number) => {
+        if (confirm('¿Eliminar esta subcategoría?')) {
+            router.delete(`/categorias/subcategorias/${id}`, {
+                onSuccess: () => {
+                    showSuccessNotification('Subcategoría eliminada!');
+                    router.reload({ only: ['subcategorias'] });
+                }
+            });
+        }
+    };
 
-      <Card className="shadow-sm border-gray-200">
-        <CardHeader className="pb-2 sm:pb-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <CardTitle className="text-lg sm:text-xl text-gray-800 font-medium">Subcategorías Registradas</CardTitle>
-            <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-              {subcategorias.length} subcategorías
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2 sm:space-y-3">
-          {subcategorias.map((subcategoria) => (
-            <div key={subcategoria.id} className="flex flex-col p-3 sm:p-4 border rounded-lg border-gray-200 hover:bg-gray-50 transition-colors gap-2">
-              <div className="flex-1">
-                <p className="font-medium text-gray-800 text-sm sm:text-base">{subcategoria.nombre}</p>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Categoría: {subcategoria.categoria}
-                </p>
-              </div>
+    // ... (resto de funciones auxiliares como getEstadoIcon, formatDate, etc.)
 
-              <div className="flex items-center justify-between">
-                <span className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium ${
-                  subcategoria.estado === 'Activo'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {subcategoria.estado}
-                </span>
+    return (
+        <div className="p-6 space-y-6">
+            {showSuccess && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
+                >
+                    {successMessage}
+                </motion.div>
+            )}
 
-                <div className="flex gap-1 sm:gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setNombre(subcategoria.nombre);
-                      setCategoriaId(
-                        categorias.find(c => c.nombre === subcategoria.categoria)?.id || ''
-                      );
-                      setEstado(subcategoria.estado);
-                      setEditandoId(subcategoria.id);
-                    }}
-                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-blue-600 hover:text-blue-800 border-gray-300 hover:bg-blue-50"
-                  >
-                    <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEliminar(subcategoria.id)}
-                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-red-600 hover:text-red-800 border-gray-300 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
+            <Card>
+                <CardHeader>
+                    <CardTitle>
+                        {editandoId ? 'Editar Subcategoría' : 'Nueva Subcategoría'}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label>Nombre</Label>
+                                <Input
+                                    value={nombre}
+                                    onChange={(e) => setNombre(e.target.value)}
+                                    placeholder="Nombre de la subcategoría"
+                                />
+                            </div>
+                            <div>
+                                <Label>Categoría</Label>
+                                <Select 
+                                    value={categoriaId} 
+                                    onValueChange={setCategoriaId}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione categoría" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categorias.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                {cat.nombre}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Estado</Label>
+                                <Select value={estado} onValueChange={setEstado}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Activo">Activo</SelectItem>
+                                        <SelectItem value="Inactivo">Inactivo</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        {error && <div className="text-red-500 text-sm">{error}</div>}
+                        <div className="flex justify-end space-x-2">
+                            {editandoId && (
+                                <Button type="button" variant="outline" onClick={resetForm}>
+                                    Cancelar
+                                </Button>
+                            )}
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? (
+                                    <Loader2 className="animate-spin mr-2" />
+                                ) : editandoId ? (
+                                    <Check className="mr-2" />
+                                ) : (
+                                    <PlusCircle className="mr-2" />
+                                )}
+                                {editandoId ? 'Actualizar' : 'Guardar'}
+                            </Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+
+            {/* Listado de subcategorías */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Listado de Subcategorías</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="mb-4 flex justify-between">
+                        <div className="relative w-64">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <Input
+                                placeholder="Buscar..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        {subcategorias
+                            .filter(sub => 
+                                sub.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                sub.categoria.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+                            )
+                            .map((subcategoria) => (
+                                <div key={subcategoria.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <div>
+                                        <div className="font-medium">{subcategoria.nombre}</div>
+                                        <div className="text-sm text-gray-500">
+                                            Categoría: {subcategoria.categoria.nombre}
+                                        </div>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleEditar(subcategoria)}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleEliminar(subcategoria.id)}
+                                        >
+                                            <Trash className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
 };
 
 export default Subcategorias;

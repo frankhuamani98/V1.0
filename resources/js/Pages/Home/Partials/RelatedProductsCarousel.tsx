@@ -1,56 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/Components/ui/carousel";
 import { Card, CardContent, CardFooter } from "@/Components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/Components/ui/carousel";
 import { Button } from "@/Components/ui/button";
 import { Badge } from "@/Components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
-import { Separator } from "@/Components/ui/separator";
 import { Progress } from "@/Components/ui/progress";
-import {
-  ShoppingCartIcon,
-  HeartIcon,
-  StarIcon,
-  InfoIcon,
-  ExternalLinkIcon,
-  ZapIcon,
-  TrendingUpIcon,
-} from "lucide-react";
+import { PauseIcon, PlayIcon, ShoppingCartIcon, HeartIcon, StarIcon, InfoIcon, ExternalLinkIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from '@inertiajs/react';
+import { Separator } from "@/Components/ui/separator";
 
-interface Producto {
+interface RelatedProductsCarouselProps {
+  products: Array<{
     id: number;
-    nombre: string;
-    descripcion_corta: string;
-    precio: number | string;
-    descuento: number | string;
-    imagen_principal: string;
-    calificacion: number;
-    destacado: boolean;
-    mas_vendido: boolean;
-    stock?: number;
+    name: string;
+    description: string;
+    price: string;
+    originalPrice: string;
+    rating: number;
+    reviews: number;
+    image: string;
+    tag: string;
+    stock: number;
+    masVendido?: boolean;
+    destacado?: boolean;
+  }>;
+  isMobile?: boolean;
 }
 
-interface CarouselSectionProps {
-  title: string;
-  productList: any[];
-  showOnlyBestSellers?: boolean;
-  showOnlyFeatured?: boolean;
-}
-
-const CarouselSection: React.FC<CarouselSectionProps> = ({ 
-  title, 
-  productList,
-  showOnlyBestSellers = false,
-  showOnlyFeatured = false
-}) => {
+const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = ({ products, isMobile = false }) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -113,6 +90,10 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
     };
   }, [api, isPlaying]);
 
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
+
   const toggleFavorite = (productId: number) => {
     setFavorites(prev => {
       const newFavorites = prev.includes(productId)
@@ -121,12 +102,12 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
 
       if (newFavorites.includes(productId)) {
         toast.success("Añadido a favoritos", {
-          description: `${productList.find(p => p.id === productId)?.name} ha sido añadido a tus favoritos.`,
+          description: `${products.find(p => p.id === productId)?.name} ha sido añadido a tus favoritos.`,
           duration: 3000,
         });
       } else {
         toast("Eliminado de favoritos", {
-          description: `${productList.find(p => p.id === productId)?.name} ha sido eliminado de tus favoritos.`,
+          description: `${products.find(p => p.id === productId)?.name} ha sido eliminado de tus favoritos.`,
           duration: 3000,
         });
       }
@@ -138,10 +119,12 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
   const addToCart = (productId: number) => {
     setCart(prev => {
       const newCart = [...prev, productId];
+
       toast.success("Añadido al carrito", {
-        description: `${productList.find(p => p.id === productId)?.name} ha sido añadido a tu carrito.`,
+        description: `${products.find(p => p.id === productId)?.name} ha sido añadido a tu carrito.`,
         duration: 3000,
       });
+
       return newCart;
     });
   };
@@ -159,17 +142,17 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
           ))}
         </div>
         <span className="text-xs text-muted-foreground">
-          {rating.toFixed(1)} ({reviews})
+          {rating} ({reviews})
         </span>
       </div>
     );
   };
 
   const calculateDiscount = (price: string, originalPrice: string) => {
-    const currentPrice = parseFloat(price.replace(/[^0-9.]/g, ''));
-    const origPrice = parseFloat(originalPrice.replace(/[^0-9.]/g, ''));
+    const currentPrice = parseFloat(price.replace('$', ''));
+    const origPrice = parseFloat(originalPrice.replace('$', ''));
 
-    if (origPrice > currentPrice && origPrice > 0) {
+    if (origPrice > currentPrice) {
       const discount = Math.round(((origPrice - currentPrice) / origPrice) * 100);
       return discount;
     }
@@ -201,11 +184,24 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
     <div className="space-y-4 py-6">
       <div className="flex items-center justify-between px-4">
         <div>
-          <h2 className="text-2xl font-bold">{title}</h2>
-          <p className="text-muted-foreground">Descubre nuestros productos tecnológicos</p>
+          <h2 className="text-2xl font-bold">Productos Relacionados</h2>
+          <p className="text-muted-foreground">Descubre más productos que podrían interesarte</p>
         </div>
-        <div className="flex flex-col items-end">
-          <Progress value={progress} className="w-20 h-1.5" />
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={togglePlayPause}
+            className="rounded-full h-9 w-9"
+          >
+            {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
+          </Button>
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-medium">
+              {currentIndex + 1} / {products.length}
+            </span>
+            <Progress value={progress} className="w-20 h-1.5" />
+          </div>
         </div>
       </div>
 
@@ -221,63 +217,38 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
           }}
         >
           <CarouselContent>
-            {productList.map((product) => {
+            {products.map((product) => {
               const discountPercentage = calculateDiscount(product.price, product.originalPrice);
 
               return (
-                <CarouselItem
-                  key={product.id}
-                  className="md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4"
-                  onMouseEnter={() => setIsPlaying(false)}
-                  onMouseLeave={() => setIsPlaying(true)}
-                >
-                  <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl border-border">
+                <CarouselItem key={product.id} className={isMobile ? "basis-full sm:basis-1/2" : "md:basis-1/2 lg:basis-1/3 xl:basis-1/4"}>
+                  <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl border-border m-1">
                     <CardContent className="p-0">
                       <div className="relative">
-                        {/* Etiquetas del producto */}
                         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
                           {product.tag &&
-                            product.tag.split(", ").map((tag: string, index: number) => (
+                            product.tag.split(", ").map((tag, index) => (
                               <Badge
                                 key={index}
-                                className={`flex items-center ${
-                                  tag === "Descuento" ? "bg-red-500 hover:bg-red-600" :
+                                className={`${
+                                  tag === "Oferta" ? "bg-red-500 hover:bg-red-600" :
                                   tag === "Nuevo" ? "bg-blue-500 hover:bg-blue-600" :
                                   tag === "Más Vendido" ? "bg-amber-500 hover:bg-amber-600" :
-                                  tag === "Destacado" ? "bg-purple-500 hover:bg-purple-600" :
+                                  tag === "Limitado" ? "bg-purple-500 hover:bg-purple-600" :
                                   "bg-green-500 hover:bg-green-600"
                                 }`}
                               >
-                                {tag === "Destacado" ? (
-                                  <>
-                                    <StarIcon className="h-3 w-3 mr-1" />
-                                    {tag}
-                                  </>
-                                ) : tag === "Más Vendido" ? (
-                                  <>
-                                    <TrendingUpIcon className="h-3 w-3 mr-1" />
-                                    {tag}
-                                  </>
-                                ) : tag === "Descuento" ? (
-                                  <>
-                                    <ZapIcon className="h-3 w-3 mr-1" />
-                                    {tag} {discountPercentage > 0 && `${discountPercentage}%`}
-                                  </>
-                                ) : (
-                                  tag
-                                )}
+                                {tag}
                               </Badge>
                             ))}
 
-                          {discountPercentage > 0 && (!product.tag || !product.tag.includes("Descuento")) && (
-                            <Badge className="flex items-center bg-red-500 hover:bg-red-600">
-                              <ZapIcon className="h-3 w-3 mr-1" />
-                              Descuento {discountPercentage}%
+                          {discountPercentage > 0 && (
+                            <Badge variant="destructive">
+                              {discountPercentage}% OFF
                             </Badge>
                           )}
                         </div>
 
-                        {/* Botones de acción */}
                         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -298,21 +269,15 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
                           </Tooltip>
                         </div>
 
-                        {/* Imagen del producto */}
                         <div className="overflow-hidden h-52 bg-muted/20">
                           <img
                             src={product.image}
                             alt={product.name}
                             className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/images/placeholder-product.png';
-                            }}
                           />
                         </div>
                       </div>
 
-                      {/* Detalles del producto */}
                       <div className="p-4 space-y-2">
                         <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
 
@@ -353,12 +318,9 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
                       <Button
                         variant="outline"
                         className="w-full gap-1.5"
-                        asChild
                       >
-                        <Link href={`/productos/${product.id}`}>
-                          <ExternalLinkIcon className="h-4 w-4" />
-                          Ver Detalles
-                        </Link>
+                        <ExternalLinkIcon className="h-4 w-4" />
+                        Ver Detalles
                       </Button>
                     </CardFooter>
                   </Card>
@@ -371,7 +333,7 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
             <CarouselPrevious className="static transform-none mx-1 h-8 w-8" />
 
             <div className="flex gap-1.5">
-              {productList.map((_, index) => (
+              {products.map((_, index) => (
                 <Button
                   key={index}
                   variant="ghost"
@@ -392,96 +354,4 @@ const CarouselSection: React.FC<CarouselSectionProps> = ({
   );
 };
 
-interface ProductsProps {
-    featuredProducts: Producto[];
-    bestSellingProducts: Producto[];
-    allProducts: Producto[];
-}
-
-const Products: React.FC<ProductsProps> = ({ 
-    featuredProducts, 
-    bestSellingProducts, 
-    allProducts 
-}) => {
-    const formatPrice = (price: any): string => {
-        if (typeof price === 'string' && price.startsWith('S/')) return price;
-        const num = typeof price === 'number' ? price : parseFloat(price) || 0;
-        return new Intl.NumberFormat('es-PE', {
-            style: 'currency',
-            currency: 'PEN',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(num);
-    };
-
-    const adaptProducts = (products: Producto[], options: {
-      isFeatured?: boolean;
-      isBestSeller?: boolean;
-    } = {}) => {
-        return products.map(product => {
-            const precio = formatPrice(product.precio);
-            const descuento = typeof product.descuento === 'string' ? parseFloat(product.descuento) : product.descuento;
-            
-            // Calcular precio original con descuento
-            let precioOriginal = precio;
-            if (descuento > 0) {
-                const precioNumerico = parseFloat(precio.replace(/[^0-9.]/g, ''));
-                precioOriginal = formatPrice(precioNumerico / (1 - descuento/100));
-            }
-
-            // Genera tags según el tipo de lista
-            const tags = [];
-            
-            if (options.isBestSeller) {
-              tags.push("Más Vendido");
-              if (descuento > 0) tags.push("Descuento");
-            } 
-            else if (options.isFeatured) {
-              tags.push("Destacado");
-              if (descuento > 0) tags.push("Descuento");
-            } 
-            else {
-              if (product.destacado) tags.push("Destacado");
-              if (product.mas_vendido) tags.push("Más Vendido");
-              if (descuento > 0) tags.push("Descuento");
-              if (tags.length === 0) tags.push("Nuevo");
-            }
-
-            return {
-                id: product.id,
-                name: product.nombre,
-                price: precio,
-                originalPrice: precioOriginal,
-                rating: product.calificacion || 4.5,
-                reviews: Math.floor(Math.random() * 100) + 20,
-                image: product.imagen_principal,
-                tag: tags.join(", "),
-                stock: product.stock || Math.floor(Math.random() * 50) + 5,
-                description: product.descripcion_corta || "Descripción del producto",
-            };
-        });
-    };
-
-    return (
-        <div className="container mx-auto px-4">
-            <CarouselSection 
-                title="Productos Destacados" 
-                productList={adaptProducts(featuredProducts, { isFeatured: true })}
-                showOnlyFeatured
-            />
-            
-            <CarouselSection 
-                title="Lo Más Vendido" 
-                productList={adaptProducts(bestSellingProducts, { isBestSeller: true })}
-                showOnlyBestSellers
-            />
-            
-            <CarouselSection 
-                title="Todos los Productos" 
-                productList={adaptProducts(allProducts)}
-            />
-        </div>
-    );
-};
-
-export default Products;
+export default RelatedProductsCarousel;

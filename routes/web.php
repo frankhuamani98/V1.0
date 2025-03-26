@@ -21,8 +21,6 @@ use App\Http\Controllers\ProductoController;
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('/resultados', [ResultadosController::class, 'index'])->name('resultados');
 
-
-
 // Rutas de autenticación
 Route::get('/register', function () {
     return Inertia::render('Auth/Register');
@@ -43,34 +41,31 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::prefix('usuarios')->group(function () {
     Route::get('/', [ListaUsuariosController::class, 'index'])->name('usuarios');
     Route::get('/administradores', [AdministradoresController::class, 'index'])->name('usuarios.administradores');
-
 });
 
 // Rutas de Productos
 Route::prefix('productos')->group(function () {
     Route::get('/agregar', [AgregarProductoController::class, 'index'])->name('productos.agregar');
     Route::post('/agregar', [AgregarProductoController::class, 'store'])->name('productos.store');
-
     Route::get('/inventario', [InventarioProductosController::class, 'index'])->name('productos.inventario');
 });
 
-// Rutas de Categorías
+// Rutas de Categorías (MODIFICADO PARA CORREGIR ERROR 404)
 Route::prefix('categorias')->group(function () {
+    // Rutas para categorías principales
     Route::get('/principales', [CategoriasPrincipalesController::class, 'index'])->name('categorias.principales');
     Route::post('/principales', [CategoriasPrincipalesController::class, 'store'])->name('categorias.principales.store');
     Route::put('/principales/{id}', [CategoriasPrincipalesController::class, 'update'])->name('categorias.principales.update');
     Route::delete('/principales/{id}', [CategoriasPrincipalesController::class, 'destroy'])->name('categorias.principales.destroy');
     
-    // Rutas para subcategorías
+    // Rutas para subcategorías (CORREGIDAS)
     Route::get('/subcategorias', [SubcategoriasController::class, 'index'])->name('subcategorias.index');
     Route::post('/subcategorias', [SubcategoriasController::class, 'store'])->name('subcategorias.store');
     Route::put('/subcategorias/{subcategoria}', [SubcategoriasController::class, 'update'])->name('subcategorias.update');
     Route::delete('/subcategorias/{subcategoria}', [SubcategoriasController::class, 'destroy'])->name('subcategorias.destroy');
 
     // Rutas para listar categorías
-
     Route::get('/lista', [ListaCategoriasController::class, 'index'])->name('categorias.lista');
-
 });
 
 // Rutas de Reservas
@@ -88,6 +83,7 @@ Route::prefix('motos')->group(function () {
     Route::put('/registro/{moto}', [RegistroMotosController::class, 'update'])->name('motos.update');
     Route::delete('/registro/{moto}', [RegistroMotosController::class, 'destroy'])->name('motos.destroy');
 });
+
 // Rutas de Facturación
 Route::prefix('facturacion')->group(function () {
     Route::get('/pendientes', [FacturasPendientesController::class, 'index'])->name('facturacion.pendientes');
@@ -103,7 +99,6 @@ Route::prefix('soporte')->group(function () {
 // Rutas de Comentarios
 Route::prefix('comentarios')->group(function () {
     Route::get('/lista', [ListaComentariosController::class, 'index'])->name('comentarios.lista');
-
 });
 
 // Rutas de Publicidad

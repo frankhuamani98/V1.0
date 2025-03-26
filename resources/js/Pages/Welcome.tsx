@@ -5,6 +5,7 @@ import MotorcycleSearch from "./Home/MotorcycleSearch";
 import CompleteCarousel from "./Home/CompleteCarousel";
 import Products from "./Home/Productos";
 import Message from "./Home/Message";
+import Footer from "./Home/Footer";
 
 interface WelcomeProps extends PageProps {
     featuredProducts: any[];
@@ -41,6 +42,7 @@ export default function Welcome({
             />
             
             <Message />
+            <Footer />
         </>
     );
 }

@@ -28,7 +28,7 @@ class AgregarProductoController extends Controller
     }
 
     /**
-     * Normaliza un valor numérico con formato de moneda a un float
+     * Normaliza un valor numérico con formato de moneda
      */
     protected function normalizeCurrency($value)
     {
@@ -36,61 +36,72 @@ class AgregarProductoController extends Controller
             return 0.00;
         }
 
-        // Eliminar todos los caracteres no numéricos excepto el punto decimal
-        $normalized = preg_replace('/[^0-9.]/', '', str_replace(',', '', $value));
-
-        return (float) $normalized;
+        // Eliminar caracteres no numéricos excepto punto decimal
+        return (float) preg_replace('/[^0-9.]/', '', str_replace(',', '', $value));
     }
 
     /**
-     * Valida y procesa las imágenes adicionales
+     * Procesa y valida las imágenes adicionales
      */
-    protected function processAdditionalImages($images)
+    protected function processAdditionalImages($input)
     {
-        // Si es una cadena JSON, decodifícala primero
-        if (is_string($images)) {
-            $images = json_decode($images, true) ?? [];
+        // Caso 1: Input es null o vacío
+        if (empty($input)) {
+            return [];
         }
 
-        if (empty($images) || !is_array($images)) {
-            return null;
+        // Caso 2: Input es un string JSON
+        if (is_string($input)) {
+            $input = json_decode($input, true);
+
+            // Si el JSON es inválido
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [];
+            }
         }
 
-        $processed = [];
-        foreach ($images as $image) {
-            if (is_array($image)) {
-                // Si ya es un array con url y estilo
-                $url = filter_var($image['url'] ?? $image, FILTER_VALIDATE_URL);
+        // Caso 3: Input no es un array en este punto
+        if (!is_array($input)) {
+            return [];
+        }
+
+        $validImages = [];
+        foreach ($input as $item) {
+            // Caso 3.1: Item es un array con estructura {url: string, estilo?: string}
+            if (is_array($item) && !empty($item['url'])) {
+                $url = filter_var($item['url'], FILTER_VALIDATE_URL);
                 if ($url !== false) {
-                    $processed[] = [
+                    $validImages[] = [
                         'url' => $url,
-                        'estilo' => $image['estilo'] ?? ''
+                        'estilo' => $item['estilo'] ?? ''
                     ];
                 }
-            } elseif (filter_var($image, FILTER_VALIDATE_URL)) {
-                // Si es solo una URL string válida
-                $processed[] = [
-                    'url' => $image,
+            }
+            // Caso 3.2: Item es solo una URL string
+            elseif (is_string($item) && filter_var($item, FILTER_VALIDATE_URL)) {
+                $validImages[] = [
+                    'url' => $item,
                     'estilo' => ''
                 ];
             }
         }
 
-        return !empty($processed) ? $processed : null;
+        return $validImages;
     }
 
     public function store(Request $request)
     {
-        // Procesar imágenes adicionales primero
+        // Procesar imágenes adicionales
         $imagenesProcesadas = $this->processAdditionalImages($request->imagenes_adicionales);
 
-        // Normalizar los campos numéricos antes de validar
+        // Normalizar campos numéricos
         $request->merge([
             'precio' => $this->normalizeCurrency($request->precio),
             'descuento' => $this->normalizeCurrency($request->descuento),
             'imagenes_adicionales' => $imagenesProcesadas
         ]);
 
+        // Validación
         $validator = Validator::make($request->all(), [
             'codigo' => 'required|string|max:50|unique:productos',
             'nombre' => 'required|string|max:255',
@@ -111,12 +122,10 @@ class AgregarProductoController extends Controller
             'destacado' => 'required|boolean',
             'mas_vendido' => 'required|boolean',
         ], [
-            'imagenes_adicionales.max' => 'No se pueden agregar más de 6 imágenes adicionales',
-            'subcategoria_id.required' => 'Debe seleccionar una subcategoría',
+            'imagenes_adicionales.max' => 'Máximo 6 imágenes adicionales permitidas',
             'imagenes_adicionales.*.url.required' => 'La URL de la imagen es requerida',
-            'imagenes_adicionales.*.url.url' => 'La URL de la imagen no es válida',
-            'precio.max' => 'El precio no puede ser mayor a 9,999,999.99',
-            'descuento.max' => 'El descuento no puede ser mayor a 100%'
+            'imagenes_adicionales.*.url.url' => 'La URL no tiene un formato válido',
+            'subcategoria_id.required' => 'Seleccione una subcategoría'
         ]);
 
         if ($validator->fails()) {
@@ -125,9 +134,8 @@ class AgregarProductoController extends Controller
                 ->withInput();
         }
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
             $producto = Producto::create([
                 'codigo' => $request->codigo,
                 'nombre' => $request->nombre,
@@ -139,7 +147,7 @@ class AgregarProductoController extends Controller
                 'precio' => $request->precio,
                 'descuento' => $request->descuento,
                 'imagen_principal' => $request->imagen_principal,
-                'imagenes_adicionales' => $request->imagenes_adicionales,
+                'imagenes_adicionales' => $request->imagenes_adicionales, // Ya procesado
                 'calificacion' => $request->calificacion,
                 'incluye_igv' => $request->incluye_igv,
                 'stock' => $request->stock,

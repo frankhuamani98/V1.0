@@ -167,23 +167,24 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
   }
 
   const agregarImagenAdicional = () => {
-    if (nuevaImagen.url && data.imagenes_adicionales.length < 6) {
+    const imagenesActuales = JSON.parse(data.imagenes_adicionales) as ImagenAdicional[];
+    if (nuevaImagen.url && imagenesActuales.length < 6) {
       setData("imagenes_adicionales", JSON.stringify([
-        ...JSON.parse(data.imagenes_adicionales),
+        ...imagenesActuales,
         { url: nuevaImagen.url, estilo: nuevaImagen.estilo }
-      ]))
-      setNuevaImagen({ url: "", estilo: "" })
+      ]));
+      setNuevaImagen({ url: "", estilo: "" });
     }
-  }
-
+  };
+  
   const eliminarImagenAdicional = (index: number) => {
     setData(
       "imagenes_adicionales",
       JSON.stringify(
-      JSON.parse(data.imagenes_adicionales).filter((_: ImagenAdicional, i: number) => i !== index)
+        JSON.parse(data.imagenes_adicionales).filter((_: ImagenAdicional, i: number) => i !== index)
       ),
-    )
-  }
+    );
+  };
 
   const handleRatingClick = (rating: number) => {
     setData("calificacion", rating)
@@ -230,27 +231,27 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
+    e.preventDefault();
+  
     const formData = {
       ...data,
       precio: parseCurrencyInput(data.precio),
-      imagenes_adicionales: JSON.stringify(data.imagenes_adicionales),
-    }
-
+      imagenes_adicionales: JSON.parse(data.imagenes_adicionales), // Asegúrate de que sea un array
+    };
+  
     router.post(route("productos.store"), formData, {
       onSuccess: () => {
-        toast.success("Producto creado exitosamente")
-        reset()
-        setActiveTab("informacion")
-        setProgress(1)
+        toast.success("Producto creado exitosamente");
+        reset();
+        setActiveTab("informacion");
+        setProgress(1);
       },
       onError: (errors) => {
-        toast.error("Error al crear el producto")
-        console.error(errors)
+        toast.error("Error al crear el producto");
+        console.error(errors);
       },
-    })
-  }
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-7xl mx-auto p-4 space-y-6">
@@ -713,7 +714,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                         <Button
                           type="button"
                           onClick={agregarImagenAdicional}
-                          disabled={!nuevaImagen.url || data.imagenes_adicionales.length >= 6}
+                          disabled={!nuevaImagen.url || JSON.parse(data.imagenes_adicionales).length >= 6}
                           className="whitespace-nowrap"
                         >
                           <Plus className="h-4 w-4 mr-1" />
@@ -755,7 +756,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                       <p className="text-red-500 text-xs mt-1">{errors.imagenes_adicionales}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {data.imagenes_adicionales.length}/6 imágenes adicionales
+                      {JSON.parse(data.imagenes_adicionales).length}/6 imágenes adicionales
                     </p>
                   </div>
                 </div>

@@ -11,7 +11,6 @@ import {
   Check,
   Plus,
   Minus,
-  Palette,
   Truck,
   Percent,
   Layers,
@@ -23,12 +22,10 @@ import {
 } from "lucide-react"
 import { Badge } from "@/Components/ui/badge"
 import { Switch } from "@/Components/ui/switch"
-import { HexColorPicker, HexColorInput } from "react-colorful"
 import { useForm, router } from "@inertiajs/react"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/Components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip"
 import { Separator } from "@/Components/ui/separator"
 import { route } from "ziggy-js"
 
@@ -51,10 +48,9 @@ interface Moto {
   estado: string
 }
 
-interface ColorOption {
-  id: string
-  nombre: string
-  hex: string
+interface ImagenAdicional {
+  url: string
+  estilo: string
 }
 
 interface AgregarProductoProps {
@@ -62,37 +58,16 @@ interface AgregarProductoProps {
   motos: Moto[]
 }
 
-const coloresPrimarios: ColorOption[] = [
-  { id: "rojo", nombre: "Rojo", hex: "#FF0000" },
-  { id: "verde", nombre: "Verde", hex: "#00FF00" },
-  { id: "azul", nombre: "Azul", hex: "#0000FF" },
-  { id: "amarillo", nombre: "Amarillo", hex: "#FFFF00" },
-  { id: "cian", nombre: "Cian", hex: "#00FFFF" },
-  { id: "magenta", nombre: "Magenta", hex: "#FF00FF" },
-  { id: "naranja", nombre: "Naranja", hex: "#FFA500" },
-  { id: "verde-lima", nombre: "Verde Lima", hex: "#00FF00" },
-  { id: "azul-cielo", nombre: "Azul Cielo", hex: "#87CEEB" },
-  { id: "rosa-fuerte", nombre: "Rosa Fuerte", hex: "#FF007F" },
-  { id: "morado", nombre: "Morado", hex: "#800080" },
-  { id: "turquesa", nombre: "Turquesa", hex: "#40E0D0" },
-]
-
 // Funciones de ayuda para formato de moneda
 const formatCurrencyInput = (value: string): string => {
   if (!value) return ""
 
-  // Eliminar todos los caracteres no numéricos excepto el punto decimal
   const numericValue = value.replace(/[^0-9.]/g, "")
-
-  // Dividir en parte entera y decimal
   const parts = numericValue.split(".")
   let integerPart = parts[0] || "0"
   const decimalPart = parts.length > 1 ? `.${parts[1].substring(0, 2)}` : ""
 
-  // Formatear la parte entera con separadores de miles
   integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-
-  // Combinar las partes
   return `${integerPart}${decimalPart}`
 }
 
@@ -121,23 +96,22 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
     precio: "",
     descuento: "0",
     imagen_principal: "",
-    imagenes_adicionales: [] as string[],
+    imagenes_adicionales: JSON.stringify([] as ImagenAdicional[]),
     calificacion: 0,
     incluye_igv: false,
     stock: 0,
-    colores: [] as string[],
-    coloresPersonalizados: [] as { hex: string }[],
     destacado: false,
     mas_vendido: false,
   })
 
-  const [nuevaImagen, setNuevaImagen] = useState("")
+  const [nuevaImagen, setNuevaImagen] = useState({
+    url: "",
+    estilo: ""
+  })
   const [hoverRating, setHoverRating] = useState(0)
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([])
   const [showStockInput, setShowStockInput] = useState(false)
   const [tempStock, setTempStock] = useState("0")
-  const [showColorPicker, setShowColorPicker] = useState(false)
-  const [customColor, setCustomColor] = useState("#3b82f6")
   const [activeTab, setActiveTab] = useState("informacion")
   const [progress, setProgress] = useState(1)
   const totalSteps = 4
@@ -188,52 +162,31 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
   }
 
   const handlePrecioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1") // Evitar múltiples puntos
+    const rawValue = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1")
     setData("precio", rawValue)
   }
 
   const agregarImagenAdicional = () => {
-    if (nuevaImagen && data.imagenes_adicionales.length < 4) {
-      setData("imagenes_adicionales", [...data.imagenes_adicionales, nuevaImagen])
-      setNuevaImagen("")
+    if (nuevaImagen.url && data.imagenes_adicionales.length < 6) {
+      setData("imagenes_adicionales", JSON.stringify([
+        ...JSON.parse(data.imagenes_adicionales),
+        { url: nuevaImagen.url, estilo: nuevaImagen.estilo }
+      ]))
+      setNuevaImagen({ url: "", estilo: "" })
     }
   }
 
   const eliminarImagenAdicional = (index: number) => {
     setData(
       "imagenes_adicionales",
-      data.imagenes_adicionales.filter((_, i) => i !== index),
+      JSON.stringify(
+      JSON.parse(data.imagenes_adicionales).filter((_: ImagenAdicional, i: number) => i !== index)
+      ),
     )
   }
 
   const handleRatingClick = (rating: number) => {
     setData("calificacion", rating)
-  }
-
-  const toggleColor = (colorId: string) => {
-    if (data.colores.includes(colorId)) {
-      setData(
-        "colores",
-        data.colores.filter((c) => c !== colorId),
-      )
-    } else {
-      setData("colores", [...data.colores, colorId])
-    }
-  }
-
-  const agregarColorPersonalizado = () => {
-    if (customColor) {
-      setData("coloresPersonalizados", [...data.coloresPersonalizados, { hex: customColor }])
-      setCustomColor("#3b82f6")
-      setShowColorPicker(false)
-    }
-  }
-
-  const eliminarColorPersonalizado = (index: number) => {
-    setData(
-      "coloresPersonalizados",
-      data.coloresPersonalizados.filter((_, i) => i !== index),
-    )
   }
 
   const handleStockChange = () => {
@@ -279,28 +232,24 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    router.post(
-      route("productos.store"),
-      {
-        ...data,
-        precio: parseCurrencyInput(data.precio),
-        imagenes_adicionales: data.imagenes_adicionales,
-        colores: data.colores,
-        coloresPersonalizados: data.coloresPersonalizados,
+    const formData = {
+      ...data,
+      precio: parseCurrencyInput(data.precio),
+      imagenes_adicionales: JSON.stringify(data.imagenes_adicionales),
+    }
+
+    router.post(route("productos.store"), formData, {
+      onSuccess: () => {
+        toast.success("Producto creado exitosamente")
+        reset()
+        setActiveTab("informacion")
+        setProgress(1)
       },
-      {
-        onSuccess: () => {
-          toast.success("Producto creado exitosamente")
-          reset()
-          setActiveTab("informacion")
-          setProgress(1)
-        },
-        onError: (errors) => {
-          toast.error("Error al crear el producto")
-          console.error(errors)
-        },
+      onError: (errors) => {
+        toast.error("Error al crear el producto")
+        console.error(errors)
       },
-    )
+    })
   }
 
   return (
@@ -330,7 +279,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
             </div>
           </div>
 
-          {/* Indicador de progreso */}
           <div className="mt-6">
             <div className="flex justify-between mb-2">
               <span className="text-xs font-medium text-indigo-100">Progreso</span>
@@ -397,7 +345,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
               </TabsTrigger>
             </TabsList>
 
-            {/* Tab: Información Básica */}
             <TabsContent value="informacion" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -502,7 +449,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                     <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                       <h3 className="font-medium text-sm flex items-center gap-2">
                         <Award className="h-4 w-4 text-indigo-600" />
-                        Opciones de Destacado
+                        Opciones de Producto
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center space-x-2 p-3 border rounded-md bg-white shadow-sm hover:shadow transition-shadow">
@@ -531,7 +478,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                 </div>
               </div>
 
-              {/* Botones de navegación */}
               <div className="flex justify-end mt-8">
                 <Button
                   type="button"
@@ -544,7 +490,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
               </div>
             </TabsContent>
 
-            {/* Tab: Precios y Stock */}
             <TabsContent value="precios" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -687,7 +632,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                 </div>
               </div>
 
-              {/* Botones de navegación */}
               <div className="flex justify-between mt-8">
                 <Button type="button" variant="outline" onClick={prevStep}>
                   <ChevronLeft className="h-5 w-5 mr-2" />
@@ -704,7 +648,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
               </div>
             </TabsContent>
 
-            {/* Tab: Imágenes */}
             <TabsContent value="imagenes" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -734,7 +677,7 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                           alt="Vista previa imagen principal"
                           className="h-full w-full object-contain"
                           onError={(e) => {
-                            ;(e.target as HTMLImageElement).src =
+                            (e.target as HTMLImageElement).src =
                               "https://placehold.co/400x400/f3f4f6/a3a3a3?text=Imagen+no+disponible"
                           }}
                         />
@@ -745,167 +688,79 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Imágenes Adicionales (Máx. 4)</Label>
-                    <div className="flex gap-2">
+                    <Label className="text-sm font-medium">Imágenes Adicionales (Máx. 6)</Label>
+                    
+                    {/* Input para URL */}
+                    <div className="flex gap-2 mb-2">
                       <Input
-                        value={nuevaImagen}
-                        onChange={(e) => setNuevaImagen(e.target.value)}
+                        value={nuevaImagen.url}
+                        onChange={(e) => setNuevaImagen({...nuevaImagen, url: e.target.value})}
                         placeholder="https://ejemplo.com/imagen-extra.jpg"
                         type="url"
                         className="h-10 flex-1"
                       />
-                      <Button
-                        type="button"
-                        onClick={agregarImagenAdicional}
-                        disabled={!nuevaImagen || data.imagenes_adicionales.length >= 4}
-                        className="whitespace-nowrap"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar
-                      </Button>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                      {data.imagenes_adicionales.map((imagen, index) => (
-                        <div
-                          key={index}
-                          className="relative group bg-white border rounded-md p-1 shadow-sm hover:shadow-md transition-shadow"
+                    
+                    {/* Input para Estilo */}
+                    {nuevaImagen.url && (
+                      <div className="flex gap-2">
+                        <Input
+                          value={nuevaImagen.estilo}
+                          onChange={(e) => setNuevaImagen({...nuevaImagen, estilo: e.target.value})}
+                          placeholder="Ej: Color Rojo, Variante A, etc."
+                          className="h-10 flex-1"
+                        />
+                        <Button
+                          type="button"
+                          onClick={agregarImagenAdicional}
+                          disabled={!nuevaImagen.url || data.imagenes_adicionales.length >= 6}
+                          className="whitespace-nowrap"
                         >
-                          <div className="aspect-square w-full overflow-hidden rounded-md bg-gray-50">
-                            <img
-                              src={imagen || "/placeholder.svg"}
-                              alt={`Imagen adicional ${index + 1}`}
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).src =
-                                  "https://placehold.co/400x400/f3f4f6/a3a3a3?text=Imagen+no+disponible"
-                              }}
-                            />
+                          <Plus className="h-4 w-4 mr-1" />
+                          Agregar
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Lista de imágenes */}
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                        {JSON.parse(data.imagenes_adicionales).map((imagen: ImagenAdicional, index: number) => (
+                        <div key={index} className="relative group bg-white border rounded-md p-2 shadow-sm">
+                          <div className="aspect-square w-full overflow-hidden rounded-md bg-gray-50 mb-2">
+                          <img
+                            src={imagen.url}
+                            alt={`Imagen ${index + 1}`}
+                            className="h-full w-full object-cover"
+                            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => 
+                            (e.currentTarget.src = "https://placehold.co/400x400?text=Error+Imagen")
+                            }
+                          />
                           </div>
+                          {imagen.estilo && (
+                          <Badge variant="outline" className="w-full text-center truncate">
+                            {imagen.estilo}
+                          </Badge>
+                          )}
                           <button
-                            type="button"
-                            onClick={() => eliminarImagenAdicional(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          type="button"
+                          onClick={() => eliminarImagenAdicional(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
                           >
-                            <X className="h-4 w-4" />
+                          <X className="h-3 w-3" />
                           </button>
                         </div>
-                      ))}
+                        ))}
                     </div>
                     {errors.imagenes_adicionales && (
                       <p className="text-red-500 text-xs mt-1">{errors.imagenes_adicionales}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {data.imagenes_adicionales.length}/4 imágenes adicionales
+                      {data.imagenes_adicionales.length}/6 imágenes adicionales
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Colores Disponibles</Label>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex flex-wrap gap-3">
-                      {coloresPrimarios.map((color) => (
-                        <TooltipProvider key={color.id}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={() => toggleColor(color.id)}
-                                className={`relative h-12 w-12 rounded-full border-2 flex items-center justify-center transition-all
-                                                                    ${data.colores.includes(color.id) ? "border-indigo-500 scale-110 shadow-md" : "border-gray-200"}`}
-                                style={{ backgroundColor: color.hex }}
-                              >
-                                {data.colores.includes(color.id) && (
-                                  <Check className="h-6 w-6 text-white drop-shadow-md" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {color.nombre} ({color.hex})
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))}
-                    </div>
-                    {data.colores.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {data.colores.map((id) => (
-                          <Badge key={id} variant="outline" className="bg-white">
-                            {coloresPrimarios.find((c) => c.id === id)?.nombre}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Agregar Color Personalizado</Label>
-                  <div className="bg-white border rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div
-                        className="h-14 w-14 rounded-full border-2 border-gray-300 cursor-pointer flex items-center justify-center shadow-sm"
-                        style={{ backgroundColor: customColor }}
-                        onClick={() => setShowColorPicker(!showColorPicker)}
-                      >
-                        <Palette className="h-6 w-6 text-white drop-shadow-sm" />
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <HexColorInput
-                            color={customColor}
-                            onChange={setCustomColor}
-                            prefixed
-                            className="border rounded px-3 py-2 flex-1 h-10"
-                          />
-                          <Button onClick={agregarColorPersonalizado} className="whitespace-nowrap h-10" type="button">
-                            <Plus className="h-4 w-4 mr-1" />
-                            Agregar
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {showColorPicker && (
-                      <div className="mt-4 bg-white p-3 rounded-lg border shadow-sm">
-                        <HexColorPicker color={customColor} onChange={setCustomColor} style={{ width: "100%" }} />
-                      </div>
-                    )}
-
-                    {data.coloresPersonalizados.length > 0 && (
-                      <div className="mt-4">
-                        <Label className="text-sm">Tus colores personalizados</Label>
-                        <div className="flex flex-wrap gap-3 mt-2">
-                          {data.coloresPersonalizados.map((color, index) => (
-                            <div key={index} className="relative group">
-                              <div
-                                className="h-12 w-12 rounded-full border-2 border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
-                                style={{ backgroundColor: color.hex }}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => eliminarColorPersonalizado(index)}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Botones de navegación */}
               <div className="flex justify-between mt-8">
                 <Button type="button" variant="outline" onClick={prevStep}>
                   <ChevronLeft className="h-5 w-5 mr-2" />
@@ -922,7 +777,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
               </div>
             </TabsContent>
 
-            {/* Tab: Categorización */}
             <TabsContent value="categorias" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="shadow-sm">
@@ -1010,7 +864,6 @@ const AgregarProducto: React.FC<AgregarProductoProps> = ({ categorias, motos }) 
                 </Card>
               </div>
 
-              {/* Botones de navegación */}
               <div className="flex justify-between mt-8">
                 <Button type="button" variant="outline" onClick={prevStep}>
                   <ChevronLeft className="h-5 w-5 mr-2" />

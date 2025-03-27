@@ -51,7 +51,7 @@ export default function Register() {
 
   // Función para validar el número de teléfono
   const isValidPhone = (phone: string) => {
-    const phoneRegex = /^\d{9}$/; // Asegura que el teléfono tenga 9 dígitos
+    const phoneRegex = /^\d{9}$/;
     return phoneRegex.test(phone);
   };
 
@@ -101,7 +101,7 @@ export default function Register() {
         toast.success('Registro exitoso!', {
           description: `Bienvenido, ${data.firstName} ${data.lastName}!`,
         });
-        reset(); // Limpia el formulario después del éxito
+        reset();
       },
       onError: (errors) => {
         toast.error('Error en el registro', {
@@ -198,7 +198,7 @@ export default function Register() {
                   className="pl-10"
                   value={data.dni}
                   onChange={(e) => setData('dni', e.target.value)}
-                  maxLength={8} // Limita el DNI a 8 caracteres
+                  maxLength={8}
                 />
               </div>
               {errors.dni && <p className="text-sm text-red-500">{errors.dni}</p>}
@@ -226,7 +226,7 @@ export default function Register() {
               {errors.sexo && <p className="text-sm text-red-500">{errors.sexo}</p>}
             </div>
 
-            {/* Campo: Correo electrónico */}
+            {/* Campo: Correo electrónico (con normalización a minúsculas) */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Correo electrónico
@@ -239,7 +239,7 @@ export default function Register() {
                   placeholder="juan.perez@ejemplo.com"
                   className="pl-10"
                   value={data.email}
-                  onChange={(e) => setData('email', e.target.value)}
+                  onChange={(e) => setData('email', e.target.value.toLowerCase())} 
                 />
               </div>
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}

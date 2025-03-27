@@ -14,28 +14,26 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('descripcion_corta', 255);
             $table->text('detalles')->nullable();
-            
+
             // Relaciones
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
             $table->foreignId('subcategoria_id')->constrained('subcategorias')->onDelete('cascade');
             $table->foreignId('moto_id')->nullable()->constrained('motos')->onDelete('set null');
-            
+
             $table->decimal('precio', 10, 2);
             $table->decimal('descuento', 5, 2)->default(0);
             $table->string('imagen_principal');
             $table->json('imagenes_adicionales')->nullable();
-            
-            $table->tinyInteger('calificacion')->default(0);
+
+            $table->tinyInteger('calificacion')->unsigned()->default(0);
             $table->boolean('incluye_igv')->default(false);
             $table->integer('stock')->default(0);
-            $table->json('colores')->nullable();
-            $table->json('colores_personalizados')->nullable();
-            
+
             $table->boolean('destacado')->default(false);
             $table->boolean('mas_vendido')->default(false);
-            
+
             $table->enum('estado', ['Activo', 'Inactivo', 'Agotado'])->default('Activo');
-            
+
             $table->timestamps();
         });
     }

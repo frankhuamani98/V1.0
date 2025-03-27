@@ -24,20 +24,24 @@ class Producto extends Model
         'calificacion',
         'incluye_igv',
         'stock',
-        'colores',
-        'colores_personalizados',
         'destacado',
-        'mas_vendido'
+        'mas_vendido',
+        'estado'
     ];
 
     protected $casts = [
         'imagenes_adicionales' => 'array',
-        'colores' => 'array',
-        'colores_personalizados' => 'array',
         'destacado' => 'boolean',
         'mas_vendido' => 'boolean',
         'incluye_igv' => 'boolean',
+        'precio' => 'decimal:2',
+        'descuento' => 'decimal:2'
     ];
+
+    // Estados disponibles
+    const ESTADO_ACTIVO = 'Activo';
+    const ESTADO_INACTIVO = 'Inactivo';
+    const ESTADO_AGOTADO = 'Agotado';
 
     public function categoria()
     {
@@ -52,5 +56,41 @@ class Producto extends Model
     public function moto()
     {
         return $this->belongsTo(Moto::class);
+    }
+
+    /**
+     * Obtener los estados disponibles para un producto
+     */
+    public static function getEstadosDisponibles(): array
+    {
+        return [
+            self::ESTADO_ACTIVO,
+            self::ESTADO_INACTIVO,
+            self::ESTADO_AGOTADO
+        ];
+    }
+
+    /**
+     * Scope para productos destacados
+     */
+    public function scopeDestacados($query)
+    {
+        return $query->where('destacado', true);
+    }
+
+    /**
+     * Scope para productos más vendidos
+     */
+    public function scopeMasVendidos($query)
+    {
+        return $query->where('mas_vendido', true);
+    }
+
+    /**
+     * Scope para productos activos
+     */
+    public function scopeActivos($query)
+    {
+        return $query->where('estado', self::ESTADO_ACTIVO);
     }
 }

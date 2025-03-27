@@ -2,7 +2,6 @@ import React from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import ListaUsuarios from '@/Layouts/Partials/Usuarios/ListaUsuarios';
 
-// Definir las props que recibe el componente
 interface ListaUsuariosPageProps {
     auth: {
         user: {
@@ -10,12 +9,26 @@ interface ListaUsuariosPageProps {
             email: string;
         };
     };
+    users: {
+        id: number;
+        username: string;
+        first_name: string;
+        last_name: string;
+        dni: string;
+        sexo: string;
+        email: string;
+        phone: string;
+        address: string;
+        role: string;
+        status: string;
+        created_at: string;
+    }[];
 }
 
-const ListaUsuariosPage = ({ auth }: ListaUsuariosPageProps) => {
+const ListaUsuariosPage = ({ auth, users }: ListaUsuariosPageProps) => {
     return (
         <DashboardLayout auth={auth}>
-            <ListaUsuarios />
+            <ListaUsuarios users={users} />
         </DashboardLayout>
     );
 };

@@ -38,16 +38,57 @@ class AgregarProductoController extends Controller
 
         // Eliminar todos los caracteres no numéricos excepto el punto decimal
         $normalized = preg_replace('/[^0-9.]/', '', str_replace(',', '', $value));
-        
+
         return (float) $normalized;
+    }
+
+    /**
+     * Valida y procesa las imágenes adicionales
+     */
+    protected function processAdditionalImages($images)
+    {
+        // Si es una cadena JSON, decodifícala primero
+        if (is_string($images)) {
+            $images = json_decode($images, true) ?? [];
+        }
+
+        if (empty($images) || !is_array($images)) {
+            return null;
+        }
+
+        $processed = [];
+        foreach ($images as $image) {
+            if (is_array($image)) {
+                // Si ya es un array con url y estilo
+                $url = filter_var($image['url'] ?? $image, FILTER_VALIDATE_URL);
+                if ($url !== false) {
+                    $processed[] = [
+                        'url' => $url,
+                        'estilo' => $image['estilo'] ?? ''
+                    ];
+                }
+            } elseif (filter_var($image, FILTER_VALIDATE_URL)) {
+                // Si es solo una URL string válida
+                $processed[] = [
+                    'url' => $image,
+                    'estilo' => ''
+                ];
+            }
+        }
+
+        return !empty($processed) ? $processed : null;
     }
 
     public function store(Request $request)
     {
+        // Procesar imágenes adicionales primero
+        $imagenesProcesadas = $this->processAdditionalImages($request->imagenes_adicionales);
+
         // Normalizar los campos numéricos antes de validar
         $request->merge([
             'precio' => $this->normalizeCurrency($request->precio),
             'descuento' => $this->normalizeCurrency($request->descuento),
+            'imagenes_adicionales' => $imagenesProcesadas
         ]);
 
         $validator = Validator::make($request->all(), [
@@ -58,18 +99,24 @@ class AgregarProductoController extends Controller
             'categoria_id' => 'required|exists:categorias,id',
             'subcategoria_id' => 'required|exists:subcategorias,id',
             'moto_id' => 'nullable|exists:motos,id',
-            'precio' => 'required|numeric|min:0|max:999999999.99',
+            'precio' => 'required|numeric|min:0|max:9999999.99',
             'descuento' => 'required|numeric|min:0|max:100',
-            'imagen_principal' => 'required|url',
-            'imagenes_adicionales' => 'nullable|array|max:4',
-            'imagenes_adicionales.*' => 'url',
+            'imagen_principal' => 'required|url|max:500',
+            'imagenes_adicionales' => 'nullable|array|max:6',
+            'imagenes_adicionales.*.url' => 'required|url|max:500',
+            'imagenes_adicionales.*.estilo' => 'nullable|string|max:100',
             'calificacion' => 'required|integer|min:0|max:5',
             'incluye_igv' => 'required|boolean',
             'stock' => 'required|integer|min:0',
-            'colores' => 'nullable|array',
-            'coloresPersonalizados' => 'nullable|array',
             'destacado' => 'required|boolean',
             'mas_vendido' => 'required|boolean',
+        ], [
+            'imagenes_adicionales.max' => 'No se pueden agregar más de 6 imágenes adicionales',
+            'subcategoria_id.required' => 'Debe seleccionar una subcategoría',
+            'imagenes_adicionales.*.url.required' => 'La URL de la imagen es requerida',
+            'imagenes_adicionales.*.url.url' => 'La URL de la imagen no es válida',
+            'precio.max' => 'El precio no puede ser mayor a 9,999,999.99',
+            'descuento.max' => 'El descuento no puede ser mayor a 100%'
         ]);
 
         if ($validator->fails()) {
@@ -80,16 +127,6 @@ class AgregarProductoController extends Controller
 
         try {
             DB::beginTransaction();
-
-            // Procesar colores personalizados
-            $coloresPersonalizados = [];
-            if (!empty($request->coloresPersonalizados)) {
-                foreach ($request->coloresPersonalizados as $color) {
-                    if (isset($color['hex'])) {
-                        $coloresPersonalizados[] = ['hex' => $color['hex']];
-                    }
-                }
-            }
 
             $producto = Producto::create([
                 'codigo' => $request->codigo,
@@ -102,21 +139,13 @@ class AgregarProductoController extends Controller
                 'precio' => $request->precio,
                 'descuento' => $request->descuento,
                 'imagen_principal' => $request->imagen_principal,
-                'imagenes_adicionales' => !empty($request->imagenes_adicionales) 
-                    ? json_encode($request->imagenes_adicionales) 
-                    : null,
+                'imagenes_adicionales' => $request->imagenes_adicionales,
                 'calificacion' => $request->calificacion,
                 'incluye_igv' => $request->incluye_igv,
                 'stock' => $request->stock,
-                'colores' => !empty($request->colores) 
-                    ? json_encode($request->colores) 
-                    : null,
-                'colores_personalizados' => !empty($coloresPersonalizados) 
-                    ? json_encode($coloresPersonalizados) 
-                    : null,
                 'destacado' => $request->destacado,
                 'mas_vendido' => $request->mas_vendido,
-                'estado' => 'Activo' // Asegurar que el estado sea activo por defecto
+                'estado' => 'Activo'
             ]);
 
             DB::commit();

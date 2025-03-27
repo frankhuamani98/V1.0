@@ -27,56 +27,30 @@ import {
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
+import { router } from "@inertiajs/react";
+import { Toaster, toast } from "sonner";
 
-const ListaUsuarios = () => {
-  const [usuarios, setUsuarios] = useState([
-    {
-      id: 1,
-      username: "juanperez",
-      first_name: "Juan",
-      last_name: "Pérez",
-      dni: "12345678",
-      sexo: "Masculino",
-      email: "juan.perez@example.com",
-      phone: "123456789",
-      address: "Calle Falsa 123",
-      password: "password123",
-      terms: true,
-      role: "admin",
-      status: "active",
-    },
-    {
-      id: 2,
-      username: "mariagomez",
-      first_name: "María",
-      last_name: "Gómez",
-      dni: "87654321",
-      sexo: "Femenino",
-      email: "maria.gomez@example.com",
-      phone: "987654321",
-      address: "Avenida Siempre Viva 456",
-      password: "password456",
-      terms: true,
-      role: "user",
-      status: "inactive",
-    },
-    {
-      id: 3,
-      username: "carloslopez",
-      first_name: "Carlos",
-      last_name: "López",
-      dni: "55555555",
-      sexo: "Masculino",
-      email: "carlos.lopez@example.com",
-      phone: "555555555",
-      address: "Calle Luna 789",
-      password: "password789",
-      terms: true,
-      role: "user",
-      status: "pending",
-    },
-  ]);
+interface Usuario {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    dni: string;
+    sexo: string;
+    email: string;
+    phone: string;
+    address: string;
+    role: string;
+    status: string;
+    created_at: string;
+}
 
+interface ListaUsuariosProps {
+    users: Usuario[];
+}
+
+const ListaUsuarios = ({ users: initialUsers }: ListaUsuariosProps) => {
+  const [users, setUsers] = useState<Usuario[]>(initialUsers);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalTipo, setModalTipo] = useState<"editar" | "ver">("ver");
@@ -88,25 +62,7 @@ const ListaUsuarios = () => {
     );
   };
 
-  interface Usuario {
-    id: number;
-    username: string;
-    first_name: string;
-    last_name: string;
-    dni: string;
-    sexo: string;
-    email: string;
-    phone: string;
-    address: string;
-    password: string;
-    terms: boolean;
-    role: string;
-    status: string;
-  }
-
-  type ModalTipo = "editar" | "ver";
-
-  const abrirModal = (usuario: Usuario, tipo: ModalTipo) => {
+  const abrirModal = (usuario: Usuario, tipo: "editar" | "ver") => {
     setUsuarioSeleccionado(usuario);
     setModalTipo(tipo);
     setModalAbierto(true);
@@ -119,9 +75,10 @@ const ListaUsuarios = () => {
 
   const guardarCambios = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!usuarioSeleccionado) return;
+
     const formData = new FormData(e.target as HTMLFormElement);
     const datosActualizados = {
-      ...usuarioSeleccionado,
       username: formData.get("username") as string,
       first_name: formData.get("first_name") as string,
       last_name: formData.get("last_name") as string,
@@ -134,17 +91,19 @@ const ListaUsuarios = () => {
       status: formData.get("status") as string,
     };
 
-  setUsuarios((prevUsuarios) =>
-  prevUsuarios.map((usuario) =>
-    usuarioSeleccionado && usuario.id === usuarioSeleccionado.id
-      ? { ...usuario, ...datosActualizados }
-      : usuario
-  )
-);
-
-
-    cerrarModal();
-    console.log("Usuario actualizado:", datosActualizados);
+    router.put(`/usuarios/${usuarioSeleccionado.id}`, datosActualizados, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setUsers(users.map(user => 
+          user.id === usuarioSeleccionado.id ? { ...user, ...datosActualizados } : user
+        ));
+        toast.success("Usuario actualizado correctamente");
+        cerrarModal();
+      },
+      onError: () => {
+        toast.error("Error al actualizar el usuario");
+      }
+    });
   };
 
   return (
@@ -166,11 +125,12 @@ const ListaUsuarios = () => {
                   <TableHead>DNI</TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Rol</TableHead>
+                  <TableHead>Estado</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usuarios.map((usuario) => (
+                {users.map((usuario) => (
                   <React.Fragment key={usuario.id}>
                     <TableRow className="sm:table-row hidden">
                       <TableCell>{usuario.first_name}</TableCell>
@@ -184,6 +144,19 @@ const ListaUsuarios = () => {
                           }
                         >
                           {usuario.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            usuario.status === "active"
+                              ? "default"
+                              : usuario.status === "inactive"
+                              ? "destructive"
+                              : "secondary"
+                          }
+                        >
+                          {usuario.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -240,6 +213,20 @@ const ListaUsuarios = () => {
                               }
                             >
                               {usuario.role}
+                            </Badge>
+                          </p>
+                          <p className="text-sm">
+                            <strong>Estado:</strong>{" "}
+                            <Badge
+                              variant={
+                                usuario.status === "active"
+                                  ? "default"
+                                  : usuario.status === "inactive"
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                            >
+                              {usuario.status}
                             </Badge>
                           </p>
                           <div className="flex space-x-2">
@@ -380,11 +367,20 @@ const ListaUsuarios = () => {
                 </div>
                 <div>
                   <Label>Estado</Label>
-                  <Input
+                  <Select
                     name="status"
                     defaultValue={usuarioSeleccionado.status}
-                    readOnly={modalTipo !== "editar"}
-                  />
+                    disabled={modalTipo !== "editar"}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Activo</SelectItem>
+                      <SelectItem value="inactive">Inactivo</SelectItem>
+                      <SelectItem value="pending">Pendiente</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               {modalTipo === "editar" && (
@@ -396,6 +392,7 @@ const ListaUsuarios = () => {
           )}
         </DialogContent>
       </Dialog>
+      <Toaster />
     </div>
   );
 };

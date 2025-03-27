@@ -19,10 +19,10 @@ interface ListaCategoriasPageProps {
     subcategorias: Array<{
         id: number;
         nombre: string;
-        categoria_id: number;
         estado: string;
         created_at: string;
         updated_at: string;
+        categoria_id: number;
         categoria: {
             id: number;
             nombre: string;

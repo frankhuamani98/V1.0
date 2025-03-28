@@ -185,180 +185,176 @@ const Subcategorias = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Subcategorías</h1>
-            <p className="text-sm sm:text-base text-gray-500 mt-1">Organiza tus productos en subcategorías</p>
+            <h1 className="text-3xl font-bold text-gray-900">Subcategorías</h1>
+            <p className="text-gray-500 mt-1">Organiza tus productos en subcategorías</p>
           </div>
-
-          {/* Barra de búsqueda y filtros */}
-          <div className="flex flex-col gap-3">
-            <div className="relative w-full">
+          <div className="flex items-center gap-3">
+            <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Buscar subcategorías..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base h-10"
+                className="pl-10 bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {/* Filtro por Estado */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-gray-300 hover:bg-gray-50 h-9 px-3">
-                    <CheckCircle2 className="h-4 w-4 mr-1 sm:mr-2" />
-                    <span className="text-xs sm:text-sm">Estado</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2">
-                  <Command>
-                    <CommandGroup heading="Filtrar por estado">
-                      <CommandItem
-                        onSelect={() => setFiltroEstado('Todos')}
-                        className={`cursor-pointer ${filtroEstado === 'Todos' ? 'bg-gray-100' : ''}`}
-                      >
-                        Todos los estados
-                      </CommandItem>
-                      <CommandItem
-                        onSelect={() => setFiltroEstado('Activo')}
-                        className={`cursor-pointer ${filtroEstado === 'Activo' ? 'bg-gray-100' : ''}`}
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                        Activo
-                      </CommandItem>
-                      <CommandItem
-                        onSelect={() => setFiltroEstado('Inactivo')}
-                        className={`cursor-pointer ${filtroEstado === 'Inactivo' ? 'bg-gray-100' : ''}`}
-                      >
-                        <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                        Inactivo
-                      </CommandItem>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+            {/* Botón de Filtro por Estado */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Estado
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2">
+                <Command>
+                  <CommandGroup heading="Filtrar por estado">
+                    <CommandItem
+                      onSelect={() => setFiltroEstado('Todos')}
+                      className={`cursor-pointer ${filtroEstado === 'Todos' ? 'bg-gray-100' : ''}`}
+                    >
+                      Todos los estados
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => setFiltroEstado('Activo')}
+                      className={`cursor-pointer ${filtroEstado === 'Activo' ? 'bg-gray-100' : ''}`}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                      Activo
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => setFiltroEstado('Inactivo')}
+                      className={`cursor-pointer ${filtroEstado === 'Inactivo' ? 'bg-gray-100' : ''}`}
+                    >
+                      <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                      Inactivo
+                    </CommandItem>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-              {/* Filtro por Categoría */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-gray-300 hover:bg-gray-50 h-9 px-3">
-                    <Filter className="h-4 w-4 mr-1 sm:mr-2" />
-                    <span className="text-xs sm:text-sm">Categoría</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2">
-                  <Command>
-                    <CommandGroup heading="Filtrar por categoría">
+            {/* Botón de Filtro por Categoría */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Categoría
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2">
+                <Command>
+                  <CommandGroup heading="Filtrar por categoría">
+                    <CommandItem
+                      onSelect={() => setFiltroCategoria('Todas')}
+                      className={`cursor-pointer ${filtroCategoria === 'Todas' ? 'bg-gray-100' : ''}`}
+                    >
+                      Todas las categorías
+                    </CommandItem>
+                    {categorias.map((cat) => (
                       <CommandItem
-                        onSelect={() => setFiltroCategoria('Todas')}
-                        className={`cursor-pointer ${filtroCategoria === 'Todas' ? 'bg-gray-100' : ''}`}
+                        key={cat.id}
+                        onSelect={() => setFiltroCategoria(cat.nombre)}
+                        className={`cursor-pointer ${filtroCategoria === cat.nombre ? 'bg-gray-100' : ''}`}
                       >
-                        Todas las categorías
+                        <CategoriaIcono categoria={cat.nombre as 'Electrónica' | 'Ropa' | 'Hogar' | 'Deportes' | 'Default'} className="h-4 w-4 mr-2" />
+                        {cat.nombre}
                       </CommandItem>
-                      {categorias.map((cat) => (
-                        <CommandItem
-                          key={cat.id}
-                          onSelect={() => setFiltroCategoria(cat.nombre)}
-                          className={`cursor-pointer ${filtroCategoria === cat.nombre ? 'bg-gray-100' : ''}`}
-                        >
-                          <CategoriaIcono categoria={cat.nombre as 'Electrónica' | 'Ropa' | 'Hogar' | 'Deportes' | 'Default'} className="h-4 w-4 mr-2" />
-                          {cat.nombre}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-              {/* Ordenar */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="border-gray-300 hover:bg-gray-50 h-9 px-3">
-                    <ArrowUpDown className="h-4 w-4 mr-1 sm:mr-2" />
-                    <span className="text-xs sm:text-sm">Ordenar</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2">
-                  <Command>
-                    <CommandGroup heading="Ordenar por">
-                      <CommandItem
-                        onSelect={() => setOrden('nombre-asc')}
-                        className={`cursor-pointer ${orden === 'nombre-asc' ? 'bg-gray-100' : ''}`}
-                      >
-                        Nombre (A-Z)
-                      </CommandItem>
-                      <CommandItem
-                        onSelect={() => setOrden('nombre-desc')}
-                        className={`cursor-pointer ${orden === 'nombre-desc' ? 'bg-gray-100' : ''}`}
-                      >
-                        Nombre (Z-A)
-                      </CommandItem>
-                      <CommandItem
-                        onSelect={() => setOrden('fecha-asc')}
-                        className={`cursor-pointer ${orden === 'fecha-asc' ? 'bg-gray-100' : ''}`}
-                      >
-                        Fecha (Antiguas)
-                      </CommandItem>
-                      <CommandItem
-                        onSelect={() => setOrden('fecha-desc')}
-                        className={`cursor-pointer ${orden === 'fecha-desc' ? 'bg-gray-100' : ''}`}
-                      >
-                        Fecha (Recientes)
-                      </CommandItem>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+            {/* Botón de Ordenar */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="border-gray-300 hover:bg-gray-50">
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  Ordenar
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2">
+                <Command>
+                  <CommandGroup heading="Ordenar por">
+                    <CommandItem
+                      onSelect={() => setOrden('nombre-asc')}
+                      className={`cursor-pointer ${orden === 'nombre-asc' ? 'bg-gray-100' : ''}`}
+                    >
+                      Nombre (A-Z)
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => setOrden('nombre-desc')}
+                      className={`cursor-pointer ${orden === 'nombre-desc' ? 'bg-gray-100' : ''}`}
+                    >
+                      Nombre (Z-A)
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => setOrden('fecha-asc')}
+                      className={`cursor-pointer ${orden === 'fecha-asc' ? 'bg-gray-100' : ''}`}
+                    >
+                      Fecha (Antiguas)
+                    </CommandItem>
+                    <CommandItem
+                      onSelect={() => setOrden('fecha-desc')}
+                      className={`cursor-pointer ${orden === 'fecha-desc' ? 'bg-gray-100' : ''}`}
+                    >
+                      Fecha (Recientes)
+                    </CommandItem>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="bg-white border-none shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-500">Total Subcategorías</p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1">{subcategorias.length}</h3>
+                  <p className="text-sm font-medium text-gray-500">Total Subcategorías</p>
+                  <h3 className="text-2xl font-bold mt-1">{subcategorias.length}</h3>
                 </div>
-                <div className="bg-indigo-100 p-2 sm:p-3 rounded-full">
-                  <SubcategoriaIcono subcategoria="Default" className="h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="bg-indigo-100 p-3 rounded-full">
+                  <SubcategoriaIcono subcategoria="Default" className="h-6 w-6" />
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="bg-white border-none shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-500">Activas</p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1">
+                  <p className="text-sm font-medium text-gray-500">Activas</p>
+                  <h3 className="text-2xl font-bold mt-1">
                     {subcategorias.filter(s => s.estado === 'Activo').length}
                   </h3>
                 </div>
-                <div className="bg-green-100 p-2 sm:p-3 rounded-full">
-                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                <div className="bg-green-100 p-3 rounded-full">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="bg-white border-none shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-500">Inactivas</p>
-                  <h3 className="text-xl sm:text-2xl font-bold mt-1">
+                  <p className="text-sm font-medium text-gray-500">Inactivas</p>
+                  <h3 className="text-2xl font-bold mt-1">
                     {subcategorias.filter(s => s.estado === 'Inactivo').length}
                   </h3>
                 </div>
-                <div className="bg-red-100 p-2 sm:p-3 rounded-full">
-                  <XCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                <div className="bg-red-100 p-3 rounded-full">
+                  <XCircle className="h-6 w-6 text-red-600" />
                 </div>
               </div>
             </CardContent>
@@ -366,48 +362,48 @@ const Subcategorias = () => {
         </div>
 
         {/* Form and List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form Card */}
           <Card className="lg:col-span-1 bg-white border-none shadow-sm">
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold flex items-center gap-2">
                 {editandoId ? (
                   <>
                     <Edit2 className="h-5 w-5 text-indigo-600" />
-                    <span>Editar Subcategoría</span>
+                    Editar Subcategoría
                   </>
                 ) : (
                   <>
                     <Plus className="h-5 w-5 text-indigo-600" />
-                    <span>Nueva Subcategoría</span>
+                    Nueva Subcategoría
                   </>
                 )}
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardDescription>
                 {editandoId ? 'Actualiza los datos de la subcategoría' : 'Completa el formulario para agregar'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
+            <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700">Nombre</label>
+                  <label className="text-sm font-medium text-gray-700">Nombre</label>
                   <Input
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     placeholder="Ej: Smartphones"
-                    className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500 h-9 sm:h-10"
+                    className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700">Categoría</label>
+                  <label className="text-sm font-medium text-gray-700">Categoría</label>
                   <Select value={categoriaId} onValueChange={setCategoriaId}>
-                    <SelectTrigger className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500 h-9 sm:h-10">
+                    <SelectTrigger className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500">
                       <SelectValue placeholder="Selecciona categoría" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-300 shadow-lg">
                       {categorias.map((categoria) => (
-                        <SelectItem key={categoria.id} value={categoria.id} className="hover:bg-gray-50 text-xs sm:text-sm">
+                        <SelectItem key={categoria.id} value={categoria.id} className="hover:bg-gray-50">
                           <div className="flex items-center">
                             <CategoriaIcono categoria={categoria.nombre as 'Electrónica' | 'Ropa' | 'Hogar' | 'Deportes' | 'Default'} className="h-4 w-4 mr-2" />
                             {categoria.nombre}
@@ -419,19 +415,19 @@ const Subcategorias = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium text-gray-700">Estado</label>
+                  <label className="text-sm font-medium text-gray-700">Estado</label>
                   <Select value={estado} onValueChange={setEstado}>
-                    <SelectTrigger className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500 h-9 sm:h-10">
+                    <SelectTrigger className="bg-white border-gray-300 focus:ring-2 focus:ring-indigo-500">
                       <SelectValue placeholder="Selecciona estado" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-300 shadow-lg">
-                      <SelectItem value="Activo" className="hover:bg-gray-50 text-xs sm:text-sm">
+                      <SelectItem value="Activo" className="hover:bg-gray-50">
                         <div className="flex items-center">
                           <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />
                           Activo
                         </div>
                       </SelectItem>
-                      <SelectItem value="Inactivo" className="hover:bg-gray-50 text-xs sm:text-sm">
+                      <SelectItem value="Inactivo" className="hover:bg-gray-50">
                         <div className="flex items-center">
                           <XCircle className="h-4 w-4 text-red-500 mr-2" />
                           Inactivo
@@ -452,14 +448,14 @@ const Subcategorias = () => {
                         setEstado('Activo');
                         setEditandoId(null);
                       }}
-                      className="w-full border-gray-300 hover:bg-gray-50 h-9 sm:h-10"
+                      className="w-full border-gray-300 hover:bg-gray-50"
                     >
                       Cancelar
                     </Button>
                   )}
                   <Button
                     type="submit"
-                    className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white h-9 sm:h-10 ${
+                    className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white ${
                       editandoId ? 'bg-indigo-700 hover:bg-indigo-800' : ''
                     }`}
                   >
@@ -472,11 +468,11 @@ const Subcategorias = () => {
 
           {/* List Card */}
           <Card className="lg:col-span-2 bg-white border-none shadow-sm">
-            <CardHeader className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <CardTitle className="text-lg sm:text-xl font-semibold">Listado de Subcategorías</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
+                  <CardTitle className="text-xl font-semibold">Listado de Subcategorías</CardTitle>
+                  <CardDescription>
                     {filteredSubcategorias.length} de {subcategorias.length} subcategorías
                   </CardDescription>
                 </div>
@@ -484,8 +480,8 @@ const Subcategorias = () => {
             </CardHeader>
             <CardContent className="p-0">
               {filteredSubcategorias.length === 0 ? (
-                <div className="text-center py-8 sm:py-12">
-                  <div className="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4">No se encontraron subcategorías</div>
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">No se encontraron subcategorías</div>
                   <Button
                     variant="ghost"
                     onClick={() => {
@@ -493,7 +489,7 @@ const Subcategorias = () => {
                       setFiltroEstado('Todos');
                       setFiltroCategoria('Todas');
                     }}
-                    className="text-indigo-600 hover:bg-indigo-50 text-xs sm:text-sm"
+                    className="text-indigo-600 hover:bg-indigo-50"
                   >
                     Limpiar filtros
                   </Button>
@@ -501,35 +497,35 @@ const Subcategorias = () => {
               ) : (
                 <div className="divide-y divide-gray-200">
                   {filteredSubcategorias.map((subcategoria) => (
-                    <div key={subcategoria.id} className="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-start sm:items-center gap-3">
-                          <div className="bg-indigo-100 p-2 sm:p-3 rounded-lg flex-shrink-0">
-                            <SubcategoriaIcono subcategoria={['Smartphones', 'Laptops', 'Muebles'].includes(subcategoria.nombre) ? subcategoria.nombre as 'Smartphones' | 'Laptops' | 'Muebles' : 'Default'} className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <div key={subcategoria.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="bg-indigo-100 p-3 rounded-lg">
+                            <SubcategoriaIcono subcategoria={['Smartphones', 'Laptops', 'Muebles'].includes(subcategoria.nombre) ? subcategoria.nombre as 'Smartphones' | 'Laptops' | 'Muebles' : 'Default'} className="h-5 w-5" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{subcategoria.nombre}</h3>
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-1">
-                              <Badge variant="outline" className="text-[10px] sm:text-xs bg-gray-100 text-gray-600">
+                            <h3 className="font-semibold text-gray-900">{subcategoria.nombre}</h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600">
                                 {subcategoria.productos} productos
                               </Badge>
-                              <Badge variant="outline" className="text-[10px] sm:text-xs bg-indigo-50 text-indigo-600">
+                              <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-600">
                                 <CategoriaIcono categoria={['Electrónica', 'Hogar', 'Ropa', 'Deportes', 'Default'].includes(subcategoria.categoria) ? subcategoria.categoria as 'Electrónica' | 'Hogar' | 'Ropa' | 'Deportes' | 'Default' : 'Default'} className="h-3 w-3 mr-1" />
                                 {subcategoria.categoria}
                               </Badge>
                               <Badge
                                 variant={subcategoria.estado === 'Activo' ? 'default' : 'destructive'}
-                                className="text-[10px] sm:text-xs"
+                                className="text-xs"
                               >
                                 {subcategoria.estado}
                               </Badge>
-                              <span className="text-[10px] sm:text-xs text-gray-500">
+                              <span className="text-xs text-gray-500">
                                 Creada: {new Date(subcategoria.fecha).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-auto">
+                        <div className="flex items-center gap-2">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -544,12 +540,12 @@ const Subcategorias = () => {
                                     setEstado(subcategoria.estado);
                                     setEditandoId(subcategoria.id);
                                   }}
-                                  className="text-indigo-600 hover:bg-indigo-50 h-7 w-7 sm:h-8 sm:w-8"
+                                  className="text-indigo-600 hover:bg-indigo-50 h-8 w-8"
                                 >
-                                  <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                  <Edit2 className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent className="text-xs border border-gray-200">
+                              <TooltipContent>
                                 <p>Editar subcategoría</p>
                               </TooltipContent>
                             </Tooltip>
@@ -561,12 +557,12 @@ const Subcategorias = () => {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleEliminar(subcategoria.id)}
-                                  className="text-red-600 hover:bg-red-50 h-7 w-7 sm:h-8 sm:w-8"
+                                  className="text-red-600 hover:bg-red-50 h-8 w-8"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent className="text-xs border border-gray-200">
+                              <TooltipContent>
                                 <p>Eliminar subcategoría</p>
                               </TooltipContent>
                             </Tooltip>

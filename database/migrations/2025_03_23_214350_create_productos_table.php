@@ -6,38 +6,38 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
             $table->string('codigo')->unique();
             $table->string('nombre');
+            $table->string('descripcion_corta', 255);
+            $table->text('detalles')->nullable();
+
+            // Relaciones
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
             $table->foreignId('subcategoria_id')->constrained('subcategorias')->onDelete('cascade');
-            $table->text('detalles')->nullable();
-            $table->text('descripcion_corta')->nullable();
-            $table->decimal('precio', 8, 2);
+            $table->foreignId('moto_id')->nullable()->constrained('motos')->onDelete('set null');
+
+            $table->decimal('precio', 10, 2);
             $table->decimal('descuento', 5, 2)->default(0);
-            $table->decimal('precio_total', 8, 2);
-            $table->decimal('igv', 5, 2)->default(18);
-            $table->integer('calificacion')->default(0);
+            $table->string('imagen_principal');
+            $table->json('imagenes_adicionales')->nullable();
+
+            $table->tinyInteger('calificacion')->unsigned()->default(0);
+            $table->boolean('incluye_igv')->default(false);
             $table->integer('stock')->default(0);
-            $table->string('foto_url')->nullable();
-            $table->boolean('disponible')->default(true);
+
             $table->boolean('destacado')->default(false);
             $table->boolean('mas_vendido')->default(false);
-            $table->json('fotos_adicionales')->nullable();
-            $table->json('compatibilidad')->nullable();
+
+            $table->enum('estado', ['Activo', 'Inactivo', 'Agotado'])->default('Activo');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('productos');

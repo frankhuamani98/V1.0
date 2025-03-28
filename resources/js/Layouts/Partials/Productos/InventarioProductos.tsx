@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu";
 import { Input } from "@/Components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/Components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select";
 import { Textarea } from "@/Components/ui/textarea";
 import * as XLSX from "xlsx";
@@ -85,10 +85,10 @@ const InventarioProductos = () => {
 
   // Filtrado y búsqueda
   const filteredProducts = productos.filter((producto) => {
-    const matchesSearch = 
+    const matchesSearch =
       producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       producto.codigo.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesSearch;
   });
 
@@ -145,7 +145,7 @@ const InventarioProductos = () => {
 
     setImportProgress(30);
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         setImportProgress(60);
@@ -153,7 +153,7 @@ const InventarioProductos = () => {
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json<Producto>(firstSheet);
-        
+
         if (jsonData.length > 0 && jsonData[0].codigo && jsonData[0].nombre) {
           setProductos(jsonData);
           setImportProgress(100);
@@ -172,12 +172,12 @@ const InventarioProductos = () => {
         setImportProgress(0);
       }
     };
-    
+
     reader.onerror = () => {
       alert("Error al leer el archivo");
       setImportProgress(0);
     };
-    
+
     reader.readAsArrayBuffer(file);
   };
 
@@ -191,7 +191,7 @@ const InventarioProductos = () => {
               Gestiona todos los productos de tu inventario
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative">
               <Input
@@ -215,7 +215,7 @@ const InventarioProductos = () => {
                 />
               </svg>
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex gap-2">
@@ -235,7 +235,7 @@ const InventarioProductos = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
           </div>
         </div>
 
@@ -272,7 +272,7 @@ const InventarioProductos = () => {
                       <p className="text-sm">{producto.stock} unidades</p>
                     </div>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="w-full">
@@ -607,7 +607,7 @@ const InventarioProductos = () => {
               <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
                 Cancelar
               </Button>
-              <Button 
+              <Button
                 variant="destructive"
                 onClick={confirmDelete}
               >
@@ -629,14 +629,14 @@ const InventarioProductos = () => {
             <div className="grid gap-4 py-4">
               <div className="grid w-full items-center gap-1.5">
                 <Label htmlFor="file">Archivo Excel</Label>
-                <Input 
-                  id="file" 
-                  type="file" 
+                <Input
+                  id="file"
+                  type="file"
                   accept=".xlsx, .xls"
                   onChange={handleFileChange}
                 />
               </div>
-              
+
               {importProgress > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -650,7 +650,7 @@ const InventarioProductos = () => {
                   <Progress value={importProgress} className="h-2" />
                 </div>
               )}
-              
+
               <div className="rounded-lg border p-4">
                 <h4 className="font-medium mb-2">Formato requerido:</h4>
                 <div className="overflow-x-auto">
@@ -698,8 +698,8 @@ const InventarioProductos = () => {
               }}>
                 Cancelar
               </Button>
-              <Button 
-                onClick={importFromExcel} 
+              <Button
+                onClick={importFromExcel}
                 disabled={!file || importProgress > 0}
               >
                 {importProgress > 0 ? "Importando..." : "Importar"}

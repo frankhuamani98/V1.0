@@ -28,30 +28,59 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        // Normalizar el identificador (convertir email a minúsculas)
+        $identifier = $this->normalizeIdentifier($credentials['identifier']);
+
         // Determinar el campo a usar para la autenticación
-        $field = filter_var($credentials['identifier'], FILTER_VALIDATE_EMAIL) ? 'email' :
-                 (is_numeric($credentials['identifier']) ? 'dni' : 'username');
+        $field = $this->determineAuthField($identifier);
 
         // Intentar autenticar al usuario
-        if (Auth::attempt([$field => $credentials['identifier'], 'password' => $credentials['password']])) {
-            $request->session()->regenerate(); // Regenerar la sesión
+        if (Auth::attempt([$field => $identifier, 'password' => $credentials['password']])) {
+            $request->session()->regenerate();
 
             $user = Auth::user();
 
             // Redirigir según el rol del usuario
-            if ($user->role === 'admin') {
-                return Inertia::render('Auth/AdminRedirect', [
-                    'user' => $user,
-                ]);
-            }
-
-            return redirect('/')->with('success', '¡Bienvenido de nuevo!');
+            return $this->handleRedirect($user);
         }
 
-        // Si la autenticación falla, devolver errores
+        // Si la autenticación falla
         return back()->withErrors([
             'identifier' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
         ]);
+    }
+
+    /**
+     * Normaliza el identificador (convierte emails a minúsculas)
+     */
+    protected function normalizeIdentifier(string $identifier): string
+    {
+        return filter_var($identifier, FILTER_VALIDATE_EMAIL) 
+               ? strtolower($identifier)
+               : $identifier;
+    }
+
+    /**
+     * Determina el campo de autenticación (email, dni o username)
+     */
+    protected function determineAuthField(string $identifier): string
+    {
+        return filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' :
+               (is_numeric($identifier) ? 'dni' : 'username');
+    }
+
+    /**
+     * Maneja la redirección según el rol del usuario
+     */
+    protected function handleRedirect($user)
+    {
+        if ($user->role === 'admin') {
+            return Inertia::render('Auth/AdminRedirect', [
+                'user' => $user,
+            ]);
+        }
+
+        return redirect('/')->with('success', '¡Bienvenido de nuevo!');
     }
 
     /**
@@ -59,11 +88,10 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout(); // Cerrar sesión
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        $request->session()->invalidate(); // Invalidar la sesión
-        $request->session()->regenerateToken(); // Regenerar el token de sesión
-
-        return redirect('/'); // Redirigir al inicio
+        return redirect('/');
     }
 }

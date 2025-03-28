@@ -2,7 +2,15 @@ import React from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Administradores from '@/Layouts/Partials/Usuarios/Administradores';
 
-// Definir las props que recibe el componente
+interface Admin {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    status: string;
+}
+
 interface AdministradoresPageProps {
     auth: {
         user: {
@@ -10,12 +18,13 @@ interface AdministradoresPageProps {
             email: string;
         };
     };
+    admins: Admin[];
 }
 
-const AdministradoresPage = ({ auth }: AdministradoresPageProps) => {
+const AdministradoresPage = ({ auth, admins }: AdministradoresPageProps) => {
     return (
         <DashboardLayout auth={auth}>
-            <Administradores />
+            <Administradores admins={admins} />
         </DashboardLayout>
     );
 };

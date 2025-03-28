@@ -35,4 +35,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'terms' => 'boolean',
     ];
+
+    // Mutator para normalizar el email a minúsculas al guardar
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = strtolower($value);
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,14 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Compartir datos globales con Inertia
-        Inertia::share([
-            'app' => [
-                'name' => config('app.name'),
-            ],
-        ]);
-
-        // Prefetch de Vite
         Vite::prefetch(concurrency: 3);
     }
 }

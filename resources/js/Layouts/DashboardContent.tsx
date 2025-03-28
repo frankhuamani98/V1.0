@@ -50,13 +50,18 @@ interface AlertCardProps {
 }
 
 const salesData = [
-  { name: 'Jan', sales: 65, target: 50 },
-  { name: 'Feb', sales: 59, target: 60 },
-  { name: 'Mar', sales: 80, target: 70 },
-  { name: 'Apr', sales: 81, target: 80 },
-  { name: 'May', sales: 56, target: 90 },
-  { name: 'Jun', sales: 55, target: 100 },
-  { name: 'Jul', sales: 40, target: 110 },
+  { name: 'Enero', sales: 65, target: 50 },
+  { name: 'Febrero', sales: 59, target: 60 },
+  { name: 'Marzo', sales: 80, target: 70 },
+  { name: 'Abril', sales: 81, target: 80 },
+  { name: 'Mayo', sales: 56, target: 90 },
+  { name: 'Junio', sales: 55, target: 100 },
+  { name: 'Julio', sales: 40, target: 110 },
+  { name: 'Agosto', sales: 40, target: 110 },
+  { name: 'Septiembre', sales: 40, target: 110 },
+  { name: 'Octubre', sales: 40, target: 110 },
+  { name: 'Noviembre', sales: 40, target: 110 },
+  { name: 'Diciembre', sales: 40, target: 110 },
 ];
 
 const partTypeData = [

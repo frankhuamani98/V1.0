@@ -1,6 +1,6 @@
 export interface User {
-    [x: string]: string;
-    [x: string]: string;
+    first_name: ReactNode;
+    last_name: ReactNode;
     id: number;
     name: string;
     email: string;

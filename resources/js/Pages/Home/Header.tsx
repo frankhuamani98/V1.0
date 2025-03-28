@@ -340,124 +340,6 @@ export default function Header() {
         isScrolled ? "bg-background/95 backdrop-blur-md shadow-sm border-b" : "bg-background"
       )}
     >
-      {/* Barra superior */}
-      <div
-        className={cn(
-          "bg-[#10192e] text-white transition-all duration-300",
-          isVisible ? "py-1" : "max-h-0 py-0 opacity-0 overflow-hidden"
-        )}
-      >
-        <div className="max-w-screen-xl mx-auto px-4 md:px-6">
-          {/* Vista de escritorio */}
-          <div className="hidden md:flex justify-between items-center h-6">
-            {/* Ubicación */}
-            <a
-              href="https://maps.app.goo.gl/aihry7fG7kKrb5xp6"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:text-blue-400 transition"
-              aria-label="Ver ubicación en Google Maps"
-            >
-              <MapPin className="h-3 w-3 text-blue-500" />
-              <span className="text-xs">Cusco, Perú</span>
-            </a>
-            {/* Información de contacto */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 transition" aria-label="Número de teléfono">
-                <Phone className="h-3 w-3 text-red-500" />
-                <span className="text-xs">+51 997 205 032</span>
-              </div>
-              <a
-                href="mailto:rogeralfarohuaman@gmail.com"
-                className="flex items-center gap-2 hover:text-blue-400 transition"
-                aria-label="Enviar correo electrónico"
-              >
-                <Mail className="h-3 w-3 text-blue-500" />
-                <span className="text-xs">rogeralfarohuaman@gmail.com</span>
-              </a>
-              <div className="flex items-center gap-2" aria-label="Horario de atención">
-                <Clock className="h-3 w-3 text-red-500" />
-                <span className="text-xs">Lun - Dom: 8:00 AM - 7:00 PM</span>
-              </div>
-            </div>
-            {/* Alternar tema */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 rounded-full bg-[#1b2a4e] text-white hover:bg-[#4c5c96] transition-all p-1"
-              onClick={toggleDarkMode}
-              aria-label={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-            >
-              {isDarkMode ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
-            </Button>
-          </div>
-
-          {/* Vista móvil */}
-          <div className="md:hidden">
-            <div className="flex justify-between items-center h-6">
-              <a
-                href="https://maps.app.goo.gl/aihry7fG7kKrb5xp6"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 hover:text-blue-400 transition"
-                aria-label="Ver ubicación en Google Maps"
-              >
-                <MapPin className="h-3 w-3 text-blue-500" />
-                <span className="text-xs truncate max-w-20">Cusco, Perú</span>
-              </a>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 rounded-full bg-[#1b2a4e] text-white hover:bg-[#4c5c96] p-1"
-                  onClick={toggleDarkMode}
-                  aria-label={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-                >
-                  {isDarkMode ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 rounded-full bg-[#1b2a4e] text-white hover:bg-[#4c5c96] p-1"
-                  onClick={toggleMobileMenu}
-                  aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
-                >
-                  {isMobileMenuOpen ? <X className="h-3 w-3" /> : <Menu className="h-3 w-3" />}
-                </Button>
-              </div>
-            </div>
-
-            {/* Menú móvil con toda la información de contacto */}
-            <div
-              className={cn(
-                "space-y-2 transition-all duration-300 overflow-hidden",
-                isMobileMenuOpen ? "max-h-32 opacity-100 py-2" : "max-h-0 opacity-0 py-0"
-              )}
-            >
-              <div className="flex items-center gap-2" aria-label="Número de teléfono">
-                <Phone className="h-3 w-3 text-red-500" />
-                <span className="text-xs">+51 999 333 666</span>
-              </div>
-
-              <a
-                href="mailto:rogeralfarohuaman@gmail.com"
-                className="flex items-center gap-2 hover:text-blue-400 transition"
-                aria-label="Enviar correo electrónico"
-              >
-                <Mail className="h-3 w-3 text-blue-500" />
-                <span className="text-xs break-all">rogeralfarohuaman@gmail.com</span>
-              </a>
-
-              <div className="flex items-center gap-2" aria-label="Horario de atención">
-                <Clock className="h-3 w-3 text-red-500" />
-                <span className="text-xs">Lun - Dom: 8:00 AM - 7:00 PM</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Navegación principal */}
       <div className="w-full max-w-[2000px] mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
@@ -612,6 +494,17 @@ export default function Header() {
               className="h-9 w-9"
             >
               {isSearchOpen ? <XIcon className="h-4 w-4" /> : <SearchIcon className="h-4 w-4" />}
+            </Button>
+
+            {/* Botón de modo oscuro */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={toggleDarkMode}
+              aria-label={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+            >
+              {isDarkMode ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
             </Button>
 
             {/* Favoritos - Desktop */}

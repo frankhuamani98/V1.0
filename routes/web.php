@@ -98,9 +98,11 @@ Route::middleware('auth')->group(function () {
     // Banners
     Route::prefix('banners')->group(function () {
         Route::get('/subir', [SubirBannersController::class, 'index'])->name('banners.subir');
+        Route::post('/subir', [SubirBannersController::class, 'store'])->name('banners.store');
+        Route::delete('/subir/{banner}', [SubirBannersController::class, 'destroy'])->name('banners.destroy');
         Route::get('/historial', [HistorialBannersController::class, 'index'])->name('banners.historial');
     });
-    
+
     // Facturación
     Route::prefix('facturacion')->group(function () {
         Route::get('/pendientes', [FacturasPendientesController::class, 'index'])->name('facturacion.pendientes');
